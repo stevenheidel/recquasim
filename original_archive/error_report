@@ -1,0 +1,17 @@
+Starting matlabpool using the 'Mesoborg' profile ... 
+Error using matlabpool (line 134)
+Could not contact an MJS lookup service on host 'mesoborg.usask.ca'. Possible
+reasons for this problem are:
+
+1. MJS has not been started, has crashed, or has been shut down.
+2. A firewall is blocking communication between this computer and
+'mesoborg.usask.ca'.
+3. This computer cannot resolve the hostname of 'mesoborg.usask.ca', it resolves
+it to an incorrect IP address.
+4. 'mesoborg.usask.ca' resolves its own hostname to an incorrect IP address.
+5. Network routers are unable to route traffic from this computer to
+'mesoborg.usask.ca'.
+
+The hostname, mesoborg.usask.ca, corresponds to the fully qualified hostname
+mesoborg.usask.ca.
+This computer resolves it to the IP address 10.80.18.6.

@@ -1,0 +1,346 @@
+\documentclass[11 pt]{article}
+\textwidth  17.5true cm \textheight 22.8true cm
+
+\oddsidemargin  -1true cm
+\evensidemargin -1true cm %\evensidemargin -0true in
+
+\headsep  .5true cm
+
+\topmargin -1.5true cm
+
+\usepackage{amsthm}
+\usepackage{amssymb, amsmath}
+
+\renewcommand{\baselinestretch}{1}
+\begin{document}
+\title{A few numerical simulations of quantum annealing}
+\author{M J Everitt,  J H Samson, S Saveliev, A P Sowa, A M Zagoskin }
+
+\date{}
+\maketitle
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\begin{abstract}
+We exploit the analyticity of the standard model for the adiabatic quantum process.  We give a theoretical analysis of the Taylor series representation of the dynamic variable and use it as a foundation for numerical simulation. The proposed algorithms have sufficient efficiency to enable simulation of the pure adiabatic process with 8 qubits. We extend our analysis to the master equation in the Lindblad form, and use our results to simulate a 6 qubit adiabatic computation in the presence of dissipation. As it turns out the two models display distinctly different distributions for the main parameter of the adiabatic quantum computing--the success probability. Our findings can be interpreted as a test for the mechanism behind controlled quantum annealing as carried out on a DWave one device, \cite{Boxio}. Based on our results we suggest that computation with the DWave device involves dissipation, resulting from interaction of qubits with the environment, in a non-negligible way.
+\end{abstract}
+
+\section{Introduction}
+
+An adiabatic computing process evolves the state vector along the trajectory $s\mapsto |\psi(s)\rangle$, where $s\in[0,1]$ is the reduced time $s=t/T$. The initial value $|\psi(0)\rangle$ is the ground state of the initial Hamiltonian $H_i$. When the process stops at $t=T$ the state $|\psi(1)\rangle$ is considered as an approximating of the ground state of the custom design Hamiltonian $H_f$, which encodes the solution of an optimization problem of choice. Thus, the evolution is driven by the time-dependent Hamiltonian
+\begin{equation}\label{Ham_of_s}
+H(s) = (1-s) H_i +s H_f,
+\end{equation}
+according to the Schr\"{o}dinger equation
+\begin{equation}\label{Schr_of_s}
+\frac{d}{ds} |\psi(s)\rangle= -i(T/\hbar)\, H(s)\,|\psi(s)\rangle.
+\end{equation}
+
+For the specific application of adiabatic computing, we assume that the underlying quantum system is an $n$-qubit register. In order to fix notation we describe the eigen-states and the corresponding eigenvalues of $H(s)$:
+\begin{equation}
+H(s) \,|m;s\rangle = E_m(s)\,|m;s\rangle,\quad  \mbox{ where }\,\, E_0(s)\leq E_1(s) \leq \ldots \leq E_{2^n-1}(s).
+\end{equation}
+However, this assumption is not necessary to derive the analytic results presented in next section. As we will see, our analysis remains valid in every case of bounded (in particular, finite) Hamiltonians $H_i, H_f$.
+
+The purpose of analysis and simulation of (\ref{Ham_of_s}) is estimation of the success probability
+\begin{equation}\label{success}
+P = |\langle \psi(1)| 0;1\rangle |^2,
+\end{equation}
+which provides a measure of the accuracy with which the adiabatic process finds the solution of the underlying problem.
+
+Our test is based on one type of experiment. First,  $T$ is selected so as to ensure convergence. For too large $T$ there may be divergence but it can be remedied by resorting to a more refined version of the algorithm which proceeds in smaller steps, see Section \ref{section_numer}. Having fixed $T$ and the number of steps the the Hamiltonian, we repeatedly conduct the numerical experiment. At every single instance $H_f$ is generated at random and the simulation outputs the probability of success $P$. We record the outcome of the series of experiments in a histogram. This type of data is comparable to the outcome of experiments with D-Wave one reported in \cite{Boxio}. The histogram of the probability of success has been adopted as a means for testing hypotheses about adiabatic computing since long ago, see e.g. \cite{Farhi}.
+
+\section{Consequences of analyticity}
+
+Since Hamiltonian (\ref{Ham_of_s}) depends on parameter $s$ linearly a solution of equation (\ref{Schr_of_s}) may be expected to depend on $s$ analytically, at least for small $s$. Thus, we look for solutions in the form of a Taylor series
+\begin{equation}\label{Ansatz}
+\psi(s) = \psi_0 +s\psi_1 +s^2\psi_2 + s^3\psi_3+\ldots
+\end{equation}
+In order to simplify notation, let us define auxiliary operators
+\begin{equation}\label{auxil}
+A = -i(T/\hbar)\, H_i \quad \mbox{and }\,\, B=-i(T/\hbar)\,(H_f-H_i).
+\end{equation}
+Thus, (\ref{Schr_of_s}) is equivalent to
+\begin{equation}\label{Schr_AB}
+\frac{d}{ds} |\psi(s)\rangle= (A+Bs)\,|\psi(s)\rangle.
+\end{equation}
+Below we will consider this equation for general bounded operators $A$ and $B$, and only later draw conclusions about the specific case (\ref{auxil}) relevant to the application at hand.
+
+
+Substituting (\ref{Ansatz}) in (\ref{Schr_AB}) we readily obtain
+\begin{equation}\label{recurrence}
+\begin{array}{lll}
+|\psi_0\rangle &=& |\psi(0)\rangle \\
+|\psi_1\rangle & =& A \,|\psi_0\rangle \\
+\vdots & &\\
+|\psi_n\rangle & = &\frac{1}{n} \left(A\, |\psi_{n-1}\rangle + B\, |\psi_{n-2}\rangle\right)\quad \mbox{ for } n\geq 2
+\end{array}
+\end{equation}
+We use this recurrence as the core of numerical schemas for simulation of the solutions of (\ref{Ham_of_s}). It allowas relatively efficient, as compared to ODE simulation, computation of consecuitive temrs and consecutive partial sums of the series (\ref{Ansatz}). Note that evaluation of the success probability (\ref{success}) requires only the computation of
+\[
+P =  |\langle\psi_0 | 0;1\rangle +\langle \psi_1| 0;1\rangle +\langle \psi_2 | 0;1\rangle+\ldots |^2.
+\]
+In other words, the solution is found, immediately as it were, at the point $s=1$ without the need of finding all the intermediate states $|\psi(s)\rangle$. This is in stark contrast to the computation based on an application of an ODE solver to (\ref{Schr_of_s}).
+ Note also that if series (\ref{Ansatz}) is known to converge absolutely, then $|\psi(s)\rangle$ automatically satisfies (\ref{Schr_of_s}). Therefore, the main issue at stake is the estimation of the radius of convergence
+\begin{equation}\label{def_Rc}
+R_{c} = \left(\limsup\limits_{n \rightarrow \infty} \|\psi_n\|^{1/n}\right)^{-1}.
+\end{equation}
+Here $\|\,\|$ denotes the $\ell_2$ norm. In general $R_c$ depends on the constituents of the process $H_i, H_f$ and possibly even $|\psi(0)\rangle$. From the point of view of simulations it is ideal to have $R_c = \infty$, which ensures that $|\psi(s)\rangle$ given in (\ref{Ansatz}) is the solution of (\ref{Schr_of_s}) for all (reduced) times $s$. If on the other hand, $R_c <1$, then the series  cannot be used to estimate the success probability. This may --- but \textit{a priori} need not to --- indicate that the optimization problem encoded via $H_f$ is inaccessible to adiabatic computing.
+
+Let us introduce the following notation:
+\begin{equation}
+a := \|A\| , \quad b := \|B\| .
+\end{equation}
+Here, $\|\,\|$ is the operator norm.
+Throughout the article we assume $0< a,b < \infty$. For the particular case of (\ref{auxil}), we have $a  = (T/\hbar)\,\|H_i\| = (T/\hbar)\,E_{2^n-1}(0), \quad b =  (T/\hbar)\,\|H_i-H_f\|$. The Hamiltonians are nontrivial and bounded, e.g. finite dimensional, and, moreover, $H_i\neq H_f$. We have the following result:
+
+\begin{theorem}\label{Radius_infty}
+$R_c = \infty$, i.e. series (\ref{Ansatz}) converges absolutely in the entire complex plane and its limit $\psi(s)$ for $s\in [0, \infty)$ is the solution of (\ref{Schr_AB}) satisfying the initial condition $\psi(0) = \psi_0$.
+\end{theorem}
+
+% Note that the theorem pertains to the general case of bounded operators $A$ and $B$.
+
+
+\subsection{Proof of the theorem}
+\label{proof_section}
+
+Recurrence (\ref{recurrence}) readily implies
+\begin{equation}\label{psi_from_P}
+|\psi_n\rangle = \frac{1}{n !}P_n\, |\psi_0\rangle,
+\end{equation}
+where $P_n = P_n(A,B)$ are operators defined via recurrence
+\begin{equation}\label{recurrence_P}
+\begin{array}{lll}
+P_0 &= &I \\
+P_1  &=& A \\
+\vdots & &\\
+P_{n+1} & = & AP_n + nBP_{n-1}\quad \mbox{ for } n\geq 1.
+\end{array}
+\end{equation}
+Note that we have $\|P_0\| =1$, $\|P_1\| = a$, and $\|P_{n+1}\| = \| AP_n + nBP_{n-1}\| \leq a \|P_n\| +n b \|P_{n-1}\|$. We wish to estimate the rate of growth of $\|P_n\|$. To this end let us consider an auxiliary scalar sequence $(p_n)$ defined via recurrence
+\begin{equation}\label{recurrence_p}
+\begin{array}{lll}
+p_0 &= &1 \\
+p_1  &=& a \\
+\vdots & &\\
+p_{n+1} & = & ap_n + nbp_{n-1}\quad \mbox{ for } n\geq 1.
+\end{array}
+\end{equation}
+Since $p_0 = \|P_0\|, p_1 =\|P_1\|$ and $p_n$ grows at least as fast as $\|P_n\|$, we clearly have
+\begin{equation}\label{stage}
+\|P_n\| \leq p_n.
+\end{equation}
+ Next, we undertake to estimate the growth rate of $(p_n)$. First, observe that $p_n = p_n(a,b)$ may be viewed as a polynomial in two variables, e.g. $p_2 = a^2 +b$, $p_3 = a^3 + 3ab$, etc. It is easily seen that the general form of the polynomials is
+ \begin{equation}\label{gen_p}
+ p_n = c_0[n]a^n + c_1[n] a^{n-2}b + c_2[n] a^{n-4}b^2 +  c_3[n] a^{n-6}b^3 + \ldots  = \sum\limits_{k=0}^{[\frac{n}{2}]}c_k[n]\, a^{n-2k}b^k,
+ \end{equation}
+ where the coefficients $c_k[n]$ remain to be found. Note that the last term of the polynomial is either $c_{n/2}[n]\, b^{n/2}$ (when $n$ is even) or $c_{[n/2]}[n]\, a b^{[n/2]}$ (when $n$ is odd), with $[x]$ denoting the integer part of $x$.
+Moreover, it is easily seen that (\ref{recurrence_p}) implies
+\begin{equation}\label{recurrence_pp}
+\begin{array}{lll}
+c_0[n] &= &1  \\
+&& \\
+c_1[n]  &=& {n\choose{2}} \\
+\vdots & &\\
+c_k[n]& = & c_k[n-1] + (n-1) c_{k-1}[n-2]
+\end{array}
+\end{equation}
+Using this, and applying induction one readily obtains an explicit formula
+\begin{equation}\label{c_formula}
+c_k[n] = (2k-1)!!  {n\choose{2k}},
+\end{equation}
+where $(2k-1)!! = 1\cdot3\cdot 5\cdot \ldots (2k-1)$.
+In light of this (\ref{gen_p}) yields
+\begin{equation}\label{term_T}
+\frac{1}{n!} \, p_n = \sum\limits_{k=0}^{[\frac{n}{2}]}\frac{1}{k!(n-2k)!} a^{n-2k}\frac{b^k}{2^k} .
+\end{equation}
+  Next, we make the following observation
+ \begin{equation}\label{inequality}
+ k! (n-2k)! \geq \left[\frac{n}{3}\right]!\quad \mbox{ for } k = 0,1,2,\ldots , [n/2] .
+ \end{equation}
+ Indeed, we either have $k\geq \left[\frac{n}{3}\right]$ or else $n-2k > n -2 \left[\frac{n}{3}\right] \geq \left[\frac{n}{3}\right] $. In either case (\ref{inequality}) follows trivially.
+
+ Next,  we obtain from (\ref{term_T}) and (\ref{inequality}):
+ \begin{equation}\label{term_T_est}
+ \begin{array}{lll}
+ \frac{1}{n!} \, p_n &=& \sum\limits_{k=0}^{[\frac{n}{2}]}\frac{1}{k!(n-2k)!} a^{n-2k}\frac{b^k}{2^k} \\
+ & \leq & \frac{1}{\left[\frac{n}{3}\right]!}a^n\{1 + \frac{b}{2a^2} + \left(\frac{b}{2a^2}\right)^2  + \left(\frac{b}{2a^2}\right)^3 +\ldots + \left(\frac{b}{2a^2}\right)^{[n/2]}\} \\
+ & \leq & \frac{1}{\left[\frac{n}{3}\right]!} a^n (1+ \frac{b}{2a^2})^{n/2}.
+ \end{array}
+\end{equation}
+ As is well known, $\left(\left[\frac{n}{3}\right]!\right) ^{1/n} \rightarrow \infty$ as $n\rightarrow \infty$. Thus, recalling definition (\ref{psi_from_P}), we obtain
+ \[
+ \|\psi_n\|^{1/n} \leq \|\frac{1}{n!}P_n\|^{1/n} \|\psi_0\|^{1/n}\leq \left(\frac{1}{n!}\,p_n\right)^{1/n} \|\psi_0\|^{1/n} =
+ \frac{1}{\left(\left[\frac{n}{3}\right]!\right)^{1/n}} a\left(1+ \frac{b}{2a^2}\right)^{1/2} \|\psi_0\|^{1/n}\rightarrow 0,
+ \]
+ which by (\ref{def_Rc}) implies $R_c = \infty$. $\Box$
+
+ \vspace*{.2cm}
+
+\noindent
+\textbf{Remark 1.} Consider the unitary map $U(s)$ defined by the adiabatic Schr\"{o}dinger equation:
+\[
+\frac{d}{ds} U(s) = -i(T/\hbar)\, H(s)\, U(s), \quad \mbox{ so that } U(s)|\psi (0)\rangle = |\psi (s)\rangle.
+\]
+Note that recurrence (\ref{recurrence_P}) applied in the special case --- i.e. $A = -i(T/\hbar)\,H_i$, $B=-i(T/\hbar)\,(H_f-H_i)$ --- provides a constructive description or simulation of $U(s)$ via the formula
+\[
+U(s) = \sum\limits_{n=0}^\infty \frac{1}{n!}\, P_n.
+\]
+In particular this description of the semigroup $s\mapsto U(s)$ may be used to simulate the evolution of mixed states. Indeed,
+ \begin{equation}\label{Schr_rho}
+\frac{d}{ds} \rho(s)= -i(T/\hbar)\, \, [H(s), \rho(s) ]\quad \Longrightarrow\quad \rho(s) = U(s)\rho(0) U(s)^*.
+ \end{equation}
+  \vspace*{.2cm}
+
+\noindent
+\textbf{Remark 2.} Note that when $b < 2a^2$ estimate (\ref{term_T_est}) may be replaced by a more efficient one. Indeed in such a case
+\[
+1 + \frac{b}{2a^2} + \left(\frac{b}{2a^2}\right)^2  + \left(\frac{b}{2a^2}\right)^3 +\ldots  \leq \frac{1}{1-\frac{b}{2a^2}}
+\]
+If in addition $a<1$, then terms $p_n/n!$ diminish very fast which ensures fast convergence of series (\ref{Ansatz}) when $s=1$, also in the numerical sense. In the special case of interest $a  = (T/\hbar)\|H_i\|, b =  (T/\hbar)\|H_i-H_f\|$ and the condition $a<1\,\& \, b< 2a^2$ is equivalent to
+\begin{equation}\label{T-Cond}
+\hbar \,\frac{\|H_i-H_f\|}{2\,\|H_i\|^2} < T < \hbar\, \frac{1}{\|H_i\|},\, \mbox{ which implies }
+\|H_i-H_f\| < 2\,\|H_i\|.
+\end{equation}
+This assumption on $T$ ensures the most efficient computation of series (\ref{Ansatz}). However, we do not claim that this restriction delineates the only regimes in which computation is effective. It is also interesting to ask if the second inequality in (\ref{T-Cond}) has special status in reality, i.e. not only in the sense of classical numerics but also with regards to the quantum adiabatic process.
+
+
+ \subsection{The master equation in Lindblad form}\label{master_subsection}
+
+In this subsection we will extend the analyticity results to the evolution prescribed by the master equation (see e.g. \cite{Percival}):
+\[
+\frac{d}{dt}\,\rho = - \frac{i}{\hbar} [H,\rho] + L\rho L^* - \frac{1}{2} L^*L\rho - \frac{1}{2} \rho L^*L .
+\]
+Here, $\rho$ is the density matrix, $H$ is the quantum system Hamiltonian and the Lindblad operator $L$ accounts for dissipation due to interaction with the environment. The master equation provides a model for the evolution of a quantum system interacting with environment which circumvents the need for a specific description of the latter. In some applications the master equation involves a finite number of different Lindblad operators. While for our purposes it is sufficient to have just one Lindblad the results presented here can easily be extended to the more general case. From now on we will only consider the evolution of finite-dimensional systems. Furthermore, we will assume that $H$ assumes the special form (\ref{Ham_of_s}) with $s = t/T$. Substituting variables (\ref{auxil}) as before, we obtain an equivalent form of the master equation
+ \begin{equation}\label{Lind}
+ \frac{d}{ds}\,\rho =  \mathcal{L}_A [\rho] + s \mathcal{L}_B [\rho]
+ \end{equation}
+ with the shorthand notation
+ \begin{equation}\label{def_LA}
+ \mathcal{L}_A [\rho]: = [A, \rho] + T\left(L\rho L^* - \frac{1}{2} L^*L\rho - \frac{1}{2} \rho L^*L \right), \quad \mbox{ and } \quad
+  \mathcal{L}_B [\rho] := [B, \rho].
+ \end{equation}
+Note that the evolution equation (\ref{Lind}) generalizes (\ref{Schr_rho}). In the context of adiabatic computing, it is vital to realize that there is an essential difference between the two types of evolution. Namely, at least if certain general conditions on $H_f$ are satisfied, the adiabatic theorem applies to the case (\ref{Schr_rho}) and ensures that the probability of success increases with increasing $T$ and will tend to one as $T$ tends to infinity. In contrast, there is no known generalization of the adiabatic theorem, extending it to the case of (\ref{Lind}). In fact, in the course of numerical experimentations we have observed that for a relatively large $L$ the probability of success may decrease with increasing time $T$. Figure 4 illustrates this phenomenon. This model suggests the necessity of isolating the quantum computing apparatus from the environment in order to limit decoherence and remain within the regime of the adiabatic theorem.
+
+In order to describe the analytic properties of (\ref{Lind}) we introduce the Hilbert space structure on the linear space of $K\times K$ matrices (e.g. $K = 2^N$ for an $N$ qubit system). For $X\in \mathbb{C}^{K\times K}$ we define the Hilbert-Schmidt norm $\|X \|_{HS} = \mbox{Tr}\, (XX^*)^{1/2}$. This norm endows $\mathbb{C}^{K\times K}$ with the Hilbert space structure.  We denote the corresponding operator norms of $\mathcal{L}_A, \mathcal{L}_B:  \mathbb{C}^{K\times K} \rightarrow \mathbb{C}^{K\times K}$ simply by $\|\mathcal{L}_A \|, \|\mathcal{L}_B \|$. As is well known, the Hilbert-Schmidt norm has the submultiplicative property $\|A B\|_{HS}\leq \|A \|_{HS} \,\|B \|_{HS}$ which, when applied to (\ref{def_LA}), yields the following estimates:
+ \begin{equation}\label{norm_est}
+\|\mathcal{L}_A \| \leq 2 \|A\|_{HS} + 2 T\, \|L\|_{HS} ^2, \quad \|\mathcal{L}_B \| \leq 2 \|B\|_{HS} .
+ \end{equation}
+
+ Next, we wish to consider solutions of (\ref{Lind}). To this end we introduce the Taylor series Ansatz
+\begin{equation}\label{Ansatz_rho}
+\rho(s) = \rho_0 +s\rho_1 +s^2\rho_2 + s^3\rho_3+\ldots
+\end{equation}
+Similarly as in the previous section, we substitute (\ref{Ansatz_rho}) into (\ref{Lind}). In this way we obtain the following description of the Taylor series coefficients:
+\begin{equation} \label{rho_n}
+ \rho_n = \frac{1}{n!}\, Q_n(\mathcal{L}_A , \mathcal{L}_B ) \rho_0,
+\end{equation}
+where $ Q_n = Q_n(\mathcal{L}_A , \mathcal{L}_B )$ is a polynomial in variables $\mathcal{L}_A$ and $\mathcal{L}_B$ defined by recursion:
+\begin{equation}\label{recurrence_Q}
+\begin{array}{lll}
+Q_0 &= &I \\
+Q_1  &=& \mathcal{L}_A  \\
+\vdots & &\\
+Q_{n+1} & = & \mathcal{L}_A Q_n + n \mathcal{L}_B Q_{n-1}\quad \mbox{ for } n\geq 1.
+\end{array}
+\end{equation}
+Comparing this with (\ref{recurrence_P}) we observe that the proof of Subsection \ref{proof_section} may be repeated almost verbatim with obvious modifications such as: replacing  $A\rightsquigarrow\mathcal{L}_A$,  $B\rightsquigarrow \mathcal{L}_B$, $P_n \rightsquigarrow Q_n$, and redefining  $a:=\|\mathcal{L}_A\|$ and $b:=\|\mathcal{L}_B\|$. This yields the following result:
+
+\begin{theorem}\label{Radius_infty_rho}
+Series (\ref{Ansatz_rho}) with coefficients defined via (\ref{rho_n}) and (\ref{recurrence_Q}) converges absolutely in the entire complex plane. Moreover, its limit $\rho(s)$ for $s\in [0, \infty)$ is the solution of (\ref{Lind}) satisfying the initial condition $\rho(0) = \rho_0$.
+\end{theorem}
+
+\section{Numerical experiments}\label{section_numer}
+
+We have conducted numerical experiments for both a pure adiabatic process (\ref{Schr_of_s}) and the process with dissipation (\ref{Lind}). With $N$ qubits we use the following Hamiltonians:
+\[
+H_i = - \sum\limits_k \sigma_k^x, \quad k\in {1, 2, \ldots, N}
+\]
+and
+\[
+H_f = H_{\mbox{Ising}} = -\sum\limits_{k<l} J_{kl}\,\sigma_k^z\sigma_l^z, \quad k,l\in {1, 2, \ldots, N}.
+\]
+Here, $J_{ij}\in\{-1, 1\}$ denote random variables with uniform distribution $P(J_{ij}=1)=P(J_{ij}=-1)= 1/2$. In numerical experiments the choice of values for $J_{ij}$'s is generated via MATLAB's generic random number generators. It is done independently for every run of the experiments discussed below.
+
+While Theorems \ref{Radius_infty} and \ref{Radius_infty_rho} ensure that the Taylor series defining solutions of Eqns. (\ref{Schr_AB}) and (\ref{Lind}) converge in the entire complex plane, numerical practice is more complicated. Namely, due to the roundoff error the Taylor series need not converge for relatively large values of $T$. However, we are frequently still be able to obtain solutions in such cases using the following observation. Defining $\tau = s-s_0$ we observe that $\psi(\tau)$ satisfies (\ref{Schr_AB}) where $s$ has been replaced by $\tau$  and $A$ replaced by $A +s_0B$ with the initial condition $\psi|_{\tau = 0} = \psi(s_0)$. Similarly, $\rho(\tau)$ satisfies (\ref{Lind}) where $s$ has been replaced by $\tau$  and $A$ replaced by $A +s_0B$ with the initial condition $\rho|_{\tau = 0} = \rho(s_0)$. This enables one to conduct computation in stages by partitioning the $s$-interval $[0,1]$ into smaller segments. Since computation within each segment is based on a faster converging Taylor series we obtain convergence of the solution in the entire $s$-interval for larger values of $T$. Even though convergence in each subinterval is faster, the computational time is generally increased by a constant factor not exceeding the number of stages.
+
+
+\subsection{Pure adiabatic Schr\"{o}dinger}
+
+We use a schema based on recurrence (\ref{recurrence}). Furthermore, we set $|\psi_0\rangle$ to be the ground state of $H_i$. It is a fact that $H_f$ is typically degenerate. Let $\Pi$ denote the projector onto the ground state space of $H_f$. The probability of success is defined as $P = \|\Pi\psi(1)\|^2$. The most interesting numerically feasible case is for $T=3$ with 8 qubits. A larger $T$ results in lack of convergence. That such a limit on $T$ for effectively computable solution exists is not surprising. Indeed, even though the theoretical solution described in Theorem \ref{Radius_infty} is guaranteed for all $s$ in practice the partial sum of the Taylor series may be seriously deformed by the round off error before convergence happens. In any case the result obtained for 8 qubits strongly suggests unimodality of the probability of success distribution, see Fig. 1.
+
+
+\subsection{Dissipative adiabatic master equation}
+
+We use a schema  based on recurrence (in notation of Subsection \ref{master_subsection}):
+\begin{equation}\label{recurrence_Q_rho}
+\begin{array}{lll}
+\rho_0 &=& |\psi_0\rangle\langle \psi_0|,\quad \mbox{ where $\psi_0$ denotes the ground state of } H_i \\
+\rho_1  &=& \mathcal{L}_A \rho_0 \\
+\vdots & &\\
+\rho_{n+1} & = & \frac{1}{n+1}\mathcal{L}_A\left( \rho_n + \mathcal{L}_B \rho_{n-1}\right)\quad \mbox{ for } n\geq 1.
+\end{array}
+\end{equation}
+ For the particular experiments presented here we took $L = .1\hat{a}$ where $\hat{a}$ is the annihilation operator, i.e. in the basis diagonalizing $H_f$  the entries of $\hat{a}$ directly above the main diagonal form a sequence $(1, \sqrt{2}, \sqrt{3}, \ldots)$ and all other entries are zero. In this setting the probability of success is defined as $P = \mbox{Tr}\,(\Pi \rho(1))$ where, again, $\Pi$ is the projector onto the ground state space of $H_f$. The range of computable systems appears bounded to 6 qubits and $T \approx 2.5$. Nevertheless within these bounds the method is  fully reliable. Indeed, the test conducted  in this regime with $L=0$ gives results fully consistent with the pure Schr\"{o}dinger, see Fig. 3. At the same time, simulation with $=.1\hat{a}$ strongly suggests bi-modality of the histogram for the probability of success.
+
+
+\subsection{Conclusions}
+
+It remains to interpret the outcome of our numerical experiments.  We have found that pure adiabatic evolution results in a uni-modal histogram of the probability of success, contrasting with a bi-modal histogram obtained in the presence of dissipation. Our main motivation for this study was the desire to better understand the mechanism behind the function of the DWave one quantum computer. In conclusion, we suggest the following comparison of our findings with the experimental results reported in \cite{Boxio}. Namely, in that article it was found that the DWave one device (with any number of qubits between 8 and 108) displays a bi-modal histogram of the probability of success.  The method for simulating solutions of the Schr\"{o}dinger and the master equations suggested in this article allowed us to conduct experiments with a relatively substantial number of qubits (8) and a significant time scale $T=4$. While this is still insufficient to directly reproduce the experimental results, we believe our numerical results to be substantial and stable enough to support the thesis that the proposed models reveal fundamental mechanisms to be at play in the case of adiabatic computation. However, both histogram patterns are rather different from that obtained in the D-Wave one experiments.
+
+
+\begin{thebibliography}{[90]}
+
+\bibitem{Boxio} S. Boixo, T. F. R{\o}nnow, S. V. Isakov, Z. Wang,
+D. Wecker, D. A. Lidar, J. M. Martinis, and M. Troyer
+(2013), arXiv:1304.4595, URL http://arxiv.org/abs/
+1304.4595.
+
+\bibitem{Farhi} E. Farhi, J. Goldstone, S, Gutmann, J. Lapan, A. Lundgren, D. Preda, {\sc Science} 292 (2001), 472--476
+
+
+%\bibitem{stripes} M Cullimore, M J Everitt, M A Ormerod, J H Samson,
+%R D Wilson and A M Zagoskin, Relationship between minimum gap and success
+%probability in adiabatic quantum computing, arXiv:1107.4034v2 [quant-ph] 31 August 2012
+
+\bibitem{Percival} I. Percival, Quantum State Diffusion, Cambridge University Press, Cambridge, UK, 1998
+
+
+\end{thebibliography}
+\newpage
+
+\begin{minipage}[t]{0.4\textwidth}
+\vbox spread 3.0in{} \special{psfile=Hist_8_qubits_pure_bigger.eps hoffset=0
+voffset=0 hscale=30 vscale=30}
+
+\noindent \emph{Figure 1.} Results obtained via computation of Taylor series solutions of the 8 qubit adiabatic  Schr\"{o}dinger  equation with $T=4$. The histogram displays probability of success outcomes for $500,000$ random Ising Hamiltonians $H_f$ sorted into 32 bins. The computation of these results took about 15minutes on a cluster of 128 MATLAB ``labs".
+\end{minipage}
+\hspace{1cm}
+\begin{minipage}[t]{0.4\textwidth}
+\vbox spread 3.0in{} \special{psfile=Hist_8_qubits_with_Lindb.eps hoffset=0
+voffset=0 hscale=30 vscale=30}
+
+\noindent \emph{Figure 2.} Results obtained via computation of Taylor series solutions of the 8 qubit master equation with the Lindblad operator $L=.1 \hat{a}$ and $T=4$. The probability of success outcomes obtained for $100,000$ random Ising Hamiltonians $H_f$ are sorted into 32 bins. The computation of these results took about 45 hours on a cluster of 128 MATLAB ``labs".
+\end{minipage}
+
+%\begin{minipage}[t]{0.4\textwidth}
+%\vbox spread 3.0in{} \special{psfile=Hist_6_qubits_with_0_Lindb_either_method.eps hoffset=0
+%voffset=0 hscale=20 vscale=20}
+%
+%\noindent \emph{Figure 3.} The histogram for adiabatic evolution modelled via either (\ref{Lind}) with no dissipation ($L=0$)  or the adiabatic evolution (\ref{Schr_of_s}) for a $6$ qubit system. The results obtained via the two methods are indistinguishable.
+%\end{minipage}
+%\hspace{1cm}
+%\begin{minipage}[t]{0.4\textwidth}
+
+\newpage
+
+\vbox spread 3.0in{} \special{psfile=P_success_of_T_4cases.eps hoffset=0
+voffset=-350 hscale=100 vscale=100}
+\vspace{5cm}
+
+\noindent \emph{Figure 3.} Dependence of the probability of success on $T$ for solutions of the 8 qubit Schr\"{o}dinger equation (a) and the master equations with the Lindblad operators $L=.1 \hat{a}$ (b), $L=.05 \hat{a}$ (c), and $L=.02 \hat{a}$ (d). Note the manifest violations of the adiabatic theorem in (b) and (c), as well as convergence to the Schr\"{o}dinger solution for diminishing norm of $L$.
+%\end{minipage}
+
+\end{document}

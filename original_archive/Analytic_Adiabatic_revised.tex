@@ -1,0 +1,223 @@
+\documentclass[11 pt]{article}
+\textwidth  17.5true cm \textheight 22.8true cm
+
+\oddsidemargin  -1true cm
+\evensidemargin -1true cm %\evensidemargin -0true in
+
+\headsep  .5true cm
+
+\topmargin -1.5true cm
+
+\usepackage{amsthm}
+\usepackage{amssymb, amsmath}
+
+\renewcommand{\baselinestretch}{1}
+\begin{document}
+\title{Exploiting analyticity of adiabatic computation}
+\author{M J Everitt, J H Samson, S Saveliev, A P Sowa, R D Wilson, A M Zagoskin }
+
+\date{}
+\maketitle
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\begin{abstract}
+We continue the investigation, initiated in \cite{stripes}, of some special aspects of adiabatic quantum computing. In this article the focus is on the analyticity of the standard model for the adiabatic quantum process. In particular, we give sufficient conditions for analyticity of the adiabatic semigroup. We use these results to draw some conclusions about the efficiency of adiabatic quantum computation. In addition, we propose an efficient algorithm for simulation of the adiabatic process and apply it to analyse the relationship between success probability and minimal gap in adiabatic quantum computing. 
+\end{abstract}
+
+\section{Introduction}
+
+An adiabatic computing process evolves the state vector along the trajectory $s\mapsto |\psi(s)\rangle$, where $s\in[0,1]$ is the reduced time $s=t/T$. The initial value $|\psi(0)\rangle$ is the ground state of the initial Hamiltonian $H_i$. When the process stops at $t=T$ the state $|\psi(1)\rangle$ is considered as an approximating of the ground state of the custom design Hamiltonian $H_f$, which encodes the solution of an optimization problem of choice. Thus, the evolution is driven by the time-dependent Hamiltonian
+\begin{equation}\label{Ham_of_s}
+H(s) = (1-s) H_i +s H_f,
+\end{equation}
+according to the Schr\"{o}dinger equation
+\begin{equation}\label{Schr_of_s}
+\frac{d}{ds} |\psi(s)\rangle= -i(T/\hbar)\, H(s)\,|\psi(s)\rangle.
+\end{equation}
+
+For the specific application of adiabatic computing, we assume that the underlying quantum system is an $n$-qubit register. In order to fix notation we describe the eigen-states and the corresponding eigenvalues of $H(s)$:
+\begin{equation}
+H(s) \,|m;s\rangle = E_m(s)\,|m;s\rangle,\quad  \mbox{ where }\,\, E_0(s)\leq E_1(s) \leq \ldots \leq E_{2^n-1}(s).
+\end{equation}
+However, this assumption is not necessary to derive the analytic results presented in next section. As we will see, our analysis remains valid in every case of bounded (in particular, finite) Hamiltonians $H_i, H_f$.
+
+The purpose of analysis and simulation of (\ref{Ham_of_s}) is estimation of the success probability
+\begin{equation}\label{success}
+P = |\langle \psi(1)| 0;1\rangle |^2,
+\end{equation}
+which provides a measure of the accuracy with which the adiabatic process finds the solution of the underlying problem. 
+
+\section{Consequences of analyticity}
+
+Since Hamiltonian (\ref{Ham_of_s}) depends on parameter $s$ linearly a solution of equation (\ref{Schr_of_s}) may be expected to depend on $s$ analytically, at least for small $s$. Thus, we look for solutions in the form of a Taylor series
+\begin{equation}\label{Ansatz}
+\psi(s) = \psi_0 +s\psi_1 +s^2\psi_2 + s^3\psi_3+\ldots
+\end{equation}
+In order to simplify notation, let us define auxiliary operators
+\begin{equation}\label{auxil}
+A = -i(T/\hbar)\, H_i \quad \mbox{and }\,\, B=-i(T/\hbar)\,(H_f-H_i). 
+\end{equation}
+Thus, (\ref{Schr_of_s}) is equivalent to
+\begin{equation}\label{Schr_AB}
+\frac{d}{ds} |\psi(s)\rangle= (A+Bs)\,|\psi(s)\rangle.
+\end{equation}
+Below we will consider this equation for general bounded operators $A$ and $B$, and only later draw conclusions about the specific case (\ref{auxil}) relevant to the application at hand.
+
+
+Substituting (\ref{Ansatz}) in (\ref{Schr_AB}) we readily obtain
+\begin{equation}\label{recurrence}
+\begin{array}{lll}
+|\psi_0\rangle &=& |\psi(0)\rangle \\
+|\psi_1\rangle & =& A \,|\psi_0\rangle \\
+\vdots & &\\
+|\psi_n\rangle & = &\frac{1}{n} \left(A\, |\psi_{n-1}\rangle + B\, |\psi_{n-2}\rangle\right)\quad \mbox{ for } n\geq 2
+\end{array}
+\end{equation}
+We use this recurrence as the core of numerical schemas for simulation of the solutions of (\ref{Ham_of_s}). It allowas relatively efficient, as compared to ODE simulation, computation of consecuitive temrs and consecutive partial sums of the series (\ref{Ansatz}). Note that evaluation of the success probability (\ref{success}) requires only the computation of 
+\[
+P =  |\langle\psi_0 | 0;1\rangle +\langle \psi_1| 0;1\rangle +\langle \psi_2 | 0;1\rangle+\ldots |^2.
+\]
+In other words, the solution is found, immediately as it were, at the point $s=1$ without the need of finding all the intermediate states $|\psi(s)\rangle$. This is in stark contrast to the computation based on an application of an ODE solver to (\ref{Schr_of_s}).
+ Note also that if series (\ref{Ansatz}) is known to converge absolutely, then $|\psi(s)\rangle$ automatically satisfies (\ref{Schr_of_s}). Therefore, the main issue at stake is the estimation of the radius of convergence
+\begin{equation}\label{def_Rc}
+R_{c} = \left(\limsup\limits_{n \rightarrow \infty} \|\psi_n\|^{1/n}\right)^{-1}.
+\end{equation}
+Here $\|\,\|$ denotes the $\ell_2$ norm. In general $R_c$ depends on the constituents of the process $H_i, H_f$ and possibly even $|\psi(0)\rangle$. From the point of view of simulations it is ideal to have $R_c = \infty$, which ensures that $|\psi(s)\rangle$ given in (\ref{Ansatz}) is the solution of (\ref{Schr_of_s}) for all (reduced) times $s$. If on the other hand, $R_c <1$, then the series  cannot be used to estimate the success probability. This may --- but \textit{a priori} need not to --- indicate that the optimization problem encoded via $H_f$ is inaccessible to adiabatic computing.
+
+Let us introduce the following notation:
+\begin{equation}
+a := \|A\| , \quad b := \|B\| .
+\end{equation}
+Here, $\|\,\|$ is the operator norm. 
+Throughout the article we assume $0< a,b < \infty$. For the particular case of (\ref{auxil}), we have $a  = (T/\hbar)\,\|H_i\| = (T/\hbar)\,E_{2^n-1}(0), \quad b =  (T/\hbar)\,\|H_i-H_f\|$. The Hamiltonians are nontrivial and bounded, e.g. finite dimensional, and, moreover, $H_i\neq H_f$. We have the following result:
+
+\begin{theorem}\label{Radius_infty}
+$R_c = \infty$, i.e. series (\ref{Ansatz}) converges absolutely in the entire complex plane and its limit $\psi(s)$ for $s\in [0, \infty)$ is the solution of (\ref{Schr_AB}) satisfying the initial condition $\psi(0) = \psi_0$. 
+\end{theorem}
+
+% Note that the theorem pertains to the general case of bounded operators $A$ and $B$. 
+
+
+\subsection{Proof of the theorem}
+
+Recurrence (\ref{recurrence}) readily implies
+\begin{equation}\label{psi_from_P}
+|\psi_n\rangle = \frac{1}{n !}P_n\, |\psi_0\rangle, 
+\end{equation}
+where $P_n = P_n(A,B)$ are operators defined via recurrence
+\begin{equation}\label{recurrence_P}
+\begin{array}{lll}
+P_0 &= &I \\
+P_1  &=& A \\
+\vdots & &\\
+P_{n+1} & = & AP_n + nBP_{n-1}\quad \mbox{ for } n\geq 1.
+\end{array}
+\end{equation}
+Note that we have $\|P_0\| =1$, $\|P_1\| = a$, and $\|P_{n+1}\| = \| AP_n + nBP_{n-1}\| \leq a \|P_n\| +n b \|P_{n-1}\|$. We wish to estimate the rate of growth of $\|P_n\|$. To this end let us consider an auxiliary scalar sequence $(p_n)$ defined via recurrence
+\begin{equation}\label{recurrence_p}
+\begin{array}{lll}
+p_0 &= &1 \\
+p_1  &=& a \\
+\vdots & &\\
+p_{n+1} & = & ap_n + nbp_{n-1}\quad \mbox{ for } n\geq 1.
+\end{array}
+\end{equation}
+Since $p_0 = \|P_0\|, p_1 =\|P_1\|$ and $p_n$ grows at least as fast as $\|P_n\|$, we clearly have 
+\begin{equation}\label{stage}
+\|P_n\| \leq p_n.
+\end{equation}
+ Next, we undertake to estimate the growth rate of $(p_n)$. First, observe that $p_n = p_n(a,b)$ may be viewed as a polynomial in two variables, e.g. $p_2 = a^2 +b$, $p_3 = a^3 + 3ab$, etc. It is easily seen that the general form of the polynomials is
+ \begin{equation}\label{gen_p}
+ p_n = c_0[n]a^n + c_1[n] a^{n-2}b + c_2[n] a^{n-4}b^2 +  c_3[n] a^{n-6}b^3 + \ldots  = \sum\limits_{k=0}^{[\frac{n}{2}]}c_k[n]\, a^{n-2k}b^k,
+ \end{equation}
+ where the coefficients $c_k[n]$ remain to be found. Note that the last term of the polynomial is either $c_{n/2}[n]\, b^{n/2}$ (when $n$ is even) or $c_{[n/2]}[n]\, a b^{[n/2]}$ (when $n$ is odd), with $[x]$ denoting the integer part of $x$.
+Moreover, it is easily seen that (\ref{recurrence_p}) implies 
+\begin{equation}\label{recurrence_p}
+\begin{array}{lll}
+c_0[n] &= &1  \\
+&& \\
+c_1[n]  &=& {n\choose{2}} \\
+\vdots & &\\
+c_k[n]& = & c_k[n-1] + (n-1) c_{k-1}[n-2]
+\end{array}
+\end{equation}
+Using this, and applying induction one readily obtains an explicit formula 
+\begin{equation}\label{c_formula}
+c_k[n] = (2k-1)!!  {n\choose{2k}},
+\end{equation}
+where $(2k-1)!! = 1\cdot3\cdot 5\cdot \ldots (2k-1)$.
+In light of this (\ref{gen_p}) yields
+\begin{equation}\label{term_T}
+\frac{1}{n!} \, p_n = \sum\limits_{k=0}^{[\frac{n}{2}]}\frac{1}{k!(n-2k)!} a^{n-2k}\frac{b^k}{2^k} .
+\end{equation}
+  Next, we make the following observation
+ \begin{equation}\label{inequality}
+ k! (n-2k)! \geq \left[\frac{n}{3}\right]!\quad \mbox{ for } k = 0,1,2,\ldots , [n/2] .
+ \end{equation}
+ Indeed, we either have $k\geq \left[\frac{n}{3}\right]$ or else $n-2k > n -2 \left[\frac{n}{3}\right] \geq \left[\frac{n}{3}\right] $. In either case (\ref{inequality}) follows trivially. 
+ 
+ Next,  we obtain from (\ref{term_T}) and (\ref{inequality}):
+ \begin{equation}\label{term_T_est}
+ \begin{array}{lll}
+ \frac{1}{n!} \, p_n &=& \sum\limits_{k=0}^{[\frac{n}{2}]}\frac{1}{k!(n-2k)!} a^{n-2k}\frac{b^k}{2^k} \\
+ & \leq & \frac{1}{\left[\frac{n}{3}\right]!}a^n\{1 + \frac{b}{2a^2} + \left(\frac{b}{2a^2}\right)^2  + \left(\frac{b}{2a^2}\right)^3 +\ldots + \left(\frac{b}{2a^2}\right)^{[n/2]}\} \\
+ & \leq & \frac{1}{\left[\frac{n}{3}\right]!} a^n (1+ \frac{b}{2a^2})^{n/2}.
+ \end{array}
+\end{equation}
+ As is well known, $\left(\left[\frac{n}{3}\right]!\right) ^{1/n} \rightarrow \infty$ as $n\rightarrow \infty$. Thus, recalling definition (\ref{psi_from_P}), we obtain
+ \[
+ \|\psi_n\|^{1/n} \leq \|\frac{1}{n!}P_n\|^{1/n} \|\psi_0\|^{1/n}\leq \left(\frac{1}{n!}\,p_n\right)^{1/n} \|\psi_0\|^{1/n} =
+ \frac{1}{\left(\left[\frac{n}{3}\right]!\right)^{1/n}} a\left(1+ \frac{b}{2a^2}\right)^{1/2} \|\psi_0\|^{1/n}\rightarrow 0,
+ \]
+ which by (\ref{def_Rc}) implies $R_c = \infty$. $\Box$
+ 
+ \vspace*{.2cm}
+
+\noindent
+\textbf{Remark 1.} Consider the unitary map $U(s)$ defined by the adiabatic Schr\"{o}dinger equation:
+\[
+\frac{d}{ds} U(s) = -i(T/\hbar)\, H(s)\, U(s), \quad \mbox{ so that } U(s)|\psi (0)\rangle = |\psi (s)\rangle. 
+\]
+Note that recurrence (\ref{recurrence_P}) applied in the special case --- i.e. $A = -i(T/\hbar)\,H_i$, $B=-i(T/\hbar)\,(H_f-H_i)$ --- provides a constructive description or simulation of $U(s)$ via the formula
+\[
+U(s) = \sum\limits_{n=0}^\infty \frac{1}{n!}\, P_n.
+\]
+In particular this description of the semigroup $s\mapsto U(s)$ may be used to simulate the evolution of mixed states. Indeed,
+ \[
+\frac{d}{ds} \rho(s)= -i(T/\hbar)\, \, [H(s), \rho(s) ]\quad \Longrightarrow\quad \rho(s) = U(s)\rho(0) U(s)^*.
+ \]
+  \vspace*{.2cm}
+
+\noindent
+\textbf{Remark 2.} Note that when $b < 2a^2$ estimate (\ref{term_T_est}) may be replaced by a more efficient one. Indeed in such a case
+\[
+1 + \frac{b}{2a^2} + \left(\frac{b}{2a^2}\right)^2  + \left(\frac{b}{2a^2}\right)^3 +\ldots  \leq \frac{1}{1-\frac{b}{2a^2}}
+\]
+If in addition $a<1$, then terms $p_n/n!$ diminish very fast which ensures fast convergence of series (\ref{Ansatz}) when $s=1$, also in the numerical sense. In the special case of interest $a  = (T/\hbar)\|H_i\|, b =  (T/\hbar)\|H_i-H_f\|$ and the condition $a<1\,\& \, b< 2a^2$ is equivalent to
+\begin{equation}\label{T-Cond}
+\hbar \,\frac{\|H_i-H_f\|}{2\,\|H_i\|^2} < T < \hbar\, \frac{1}{\|H_i\|},\, \mbox{ which implies }
+\|H_i-H_f\| < 2\|H_i\|.
+\end{equation}
+This assumption on $T$ ensures the most efficient computation of series (\ref{Ansatz}). However, it remains to be seen if good probability of success can be attained in such a regime.  It is also interesting to ask if the second inequality in (\ref{T-Cond}) has special status in reality, i.e. not only in the sense of classical numerics but also with regards to the quantum adiabatic process. 
+ 
+ 
+ 
+ 
+
+\newpage
+\begin{thebibliography}{[90]}
+
+\bibitem{stripes} M Cullimore, M J Everitt, M A Ormerod, J H Samson,
+R D Wilson and A M Zagoskin, Relationship between minimum gap and success
+probability in adiabatic quantum computing, arXiv:1107.4034v2 [quant-ph] 31 August 2012
+
+\end{thebibliography}
+
+
+
+
+
+\end{document}
