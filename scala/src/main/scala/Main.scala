@@ -1,7 +1,7 @@
 object Main extends App {
-  for (i <- 1 to 4) {
-    val h = ZeroHamiltonian(i)
+  val n = args(0).toInt
 
-    println(h.sparseMatrix.size)
-  }
+  val result = PSuccessDWaveTest(ZeroHamiltonian(n).sparseMatrix, RandomIsing(n), 3, 1000)
+  
+  println(result)
 }

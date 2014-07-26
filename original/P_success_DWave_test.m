@@ -25,7 +25,6 @@ psi_0 = (1/sqrt(m))*ones(m,1);
 h_f = diag(H_f); % H_f is diagonal so all eigenvecotrs are e_n where n \in ind
 ind = (h_f == min(h_f)); % this is a sufficient description of the projector 
                          % -- see last lines of this code
-
  
 %[V,~] =  eig(H_f);
 %psi_des = V(:,1);  
@@ -36,7 +35,7 @@ B = -1i*T*(H_f - H_i);
 
 % initialize recurrence
 
-psi_n_min_2 =  psi_0;
+psi_n_min_2 = psi_0;
 psi_n_min_1 = A*psi_0;
 psi = psi_n_min_1 + psi_n_min_2;
 %psi_n = zeros(size(psi_n_min_1));

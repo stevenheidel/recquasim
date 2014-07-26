@@ -8,7 +8,7 @@ P = zeros(1,runs);
 
 parfor k=1:runs
 H_f = random_Ising(N);
-P(k) = P_success_DWave_test(sparse(H_i), sparse(H_f), T, iter);
+P(k) = P_success_DWave_test(H_i, H_f, T, iter);
 end
 
 %hist(P,32)
