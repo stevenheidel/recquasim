@@ -1,4 +1,4 @@
-function [P, psi] = PInstallments(H_i, H_f, T, iter, ninstal)
+function [P, psi] = P_installments(H_i, H_f, T, iter, ninstal)
 
 % Calculate the probability of success for an adiabatic process
 % using the method of analytic series expansion in ninstal steps
