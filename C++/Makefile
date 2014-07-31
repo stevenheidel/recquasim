@@ -1,11 +1,13 @@
 TARGET = recquasim
 LIBS = -lm
 CC = g++
-CFLAGS = -g -Wall -std=c++11
+CFLAGS = -g -Wall -Wextra -Werror -pedantic -std=c++11
 
 .PHONY: default all clean
 
 default: $(TARGET)
+	./$(TARGET)
+
 all: default
 
 OBJECTS = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
