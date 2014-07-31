@@ -11,7 +11,7 @@ Specialized Matrix Requirements:
 - Only ever multiplied with a vector, so just need a count of elements per row
 */
 
-case class SpecialMatrix private(
+case class SpecialMatrix(
   size: Size, // Size of the matrix
   diagonal: SpecialVector,
   factor: Complex[Double],
@@ -19,24 +19,42 @@ case class SpecialMatrix private(
 ) {
   val length = size.dim
 
-  def *(b: Complex[Double]): SpecialMatrix = {
+  def *(b: Complex[Double]) = {
     copy(
       diagonal = diagonal * b,
       factor = factor * b
     )
   }
 
-  def -(b: SpecialMatrix): SpecialMatrix = {
+  def *(b: SpecialVector): SpecialVector = {
+    if (length != b.length)
+      throw new RuntimeException("Special matrix and special vector lengths must match")
+
+    val newVector = b * factor * factorsPerRow
+    
+    if (diagonal.isEmpty) newVector
+    else newVector element_* diagonal
+  }
+
+  def +(b: SpecialMatrix) = {
     if (factor != 0 && b.factor != 0) 
       throw new RuntimeException("Both special matrices have elements off the diagonal!")
 
     val newDiagonal = {
-      if      (diagonal.isEmpty)   b.diagonal * -1
+      if      (diagonal.isEmpty)   b.diagonal
       else if (b.diagonal.isEmpty) diagonal
-      else                         diagonal - b.diagonal
+      else                         diagonal + b.diagonal
     }
 
-    copy(diagonal = newDiagonal, factor = factor - b.factor)
+    copy(
+      diagonal = newDiagonal, 
+      factor = factor + b.factor, 
+      factorsPerRow = max(factorsPerRow, b.factorsPerRow)
+    )
+  }
+
+  def -(b: SpecialMatrix) = {
+    this.+(b * -1)
   }
 }
 
