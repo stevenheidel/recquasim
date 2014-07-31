@@ -1,0 +1,29 @@
+package specificlinalg
+
+import spire.implicits._
+import spire.math._
+
+case class SpecialVector private(
+  seq: Seq[Complex[Double]]
+) {
+  def isEmpty = seq.isEmpty
+
+  def *(b: Complex[Double]) = copy(seq.map(_ * b))
+
+  def -(b: SpecialVector) = {
+    if (seq.length != b.seq.length)
+      throw new RuntimeException("Both special vectors are not the same length!")
+
+    copy((seq, b.seq).zipped.map(_ - _))
+  }
+}
+
+object SpecialVector {
+  import breeze.linalg._
+
+  def empty = SpecialVector(Seq.empty)
+
+  def fromDenseVector(denseVector: DenseVector[Int]) = {
+    SpecialVector(denseVector.toArray.map(x => Complex(x.toDouble, 0)))
+  }
+}

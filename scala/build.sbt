@@ -4,7 +4,8 @@ version := "1.0"
 
 libraryDependencies ++= Seq(
   "org.scalanlp" %% "breeze" % "0.8.1",
-  "org.scalanlp" %% "breeze-natives" % "0.8.1"
+  "org.scalanlp" %% "breeze-natives" % "0.8.1",
+  "org.spire-math" %% "spire" % "0.7.5"
 )
 
 resolvers ++= Seq(

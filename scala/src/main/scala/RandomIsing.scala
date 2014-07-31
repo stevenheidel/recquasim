@@ -1,20 +1,13 @@
+import specificlinalg._
 import breeze.linalg._
-import breeze.numerics._
 import scala.util.Random
 
 object RandomIsing {
-  def toSparseMatrix(vector: DenseVector[Int]): CSCMatrix[Int] = {
-    val size = vector.length
-    val builder = new CSCMatrix.Builder[Int](rows=size, cols=size)
-
-    for (i <- 0 until size) {
-      builder.add(i, i, vector(i))
-    }
-
-    builder.result()
+  def construct(n: Int): SpecialMatrix = {
+    SpecialMatrix.withDiagonal(Size(n), SpecialVector.fromDenseVector(denseVector(n)))
   }
 
-  def apply(n: Int): DenseVector[Int] = {
+  def denseVector(n: Int): DenseVector[Int] = {
     val size = math.pow(2, n).toInt
     val result = DenseVector.zeros[Int](size)
 
@@ -54,21 +47,3 @@ object RandomIsing {
     }
   }
 }
-
-/*
-for n=4
-2 1 => 4 1s, 4 -1s
-3 1 => 2 1 doubled
-3 2 => 2 1 reversed
-4 1 => 3 1 doubled
-4 2 => 3 1 reversed
-4 3 => 3 2 reversed
-
-if (l == 2, k == 1)
-  half 1s, half -1s
-else
-  if (k == 1)
-    (i-1, j-1) doubled
-  else
-    (i-1, j-1) reversed
-*/

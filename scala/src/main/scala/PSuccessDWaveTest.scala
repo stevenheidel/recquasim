@@ -2,6 +2,7 @@ import breeze.linalg._
 import breeze.numerics._
 import breeze.math._
 
+/*
 object PSuccessDWaveTest {
   def apply(h_i_int: CSCMatrix[Int], h_f_int: DenseVector[Int], t: Double, iter: Int): Double = {
     val m = h_f_int.length
@@ -37,6 +38,7 @@ object PSuccessDWaveTest {
     math.pow(norm(DenseVector(ind.toArray)), 2)
   }
 }
+*/
 
 /*
 % initialize recurrence
