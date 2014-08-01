@@ -1,4 +1,3 @@
-import specificlinalg._
 import breeze.linalg._
 import scala.util.Random
 

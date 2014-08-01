@@ -1,3 +1,5 @@
+
+
 object Main extends App {
   def time[R](block: => R): R = {
     val t0 = System.nanoTime()
@@ -7,7 +9,7 @@ object Main extends App {
     result
   }
 
-  val n = 10//args(0).toInt
+  val n = args(0).toInt
 
   val h_i = ZeroHamiltonian.construct(n)
   val h_f = RandomIsing.construct(n)

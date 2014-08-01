@@ -1,4 +1,3 @@
-import specificlinalg._
 import spire.implicits._
 import spire.math._
 

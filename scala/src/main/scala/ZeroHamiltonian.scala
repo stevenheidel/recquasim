@@ -1,4 +1,4 @@
-import specificlinalg._
+
 
 object ZeroHamiltonian {
   def construct(n: Int): HybridMatrix = {
