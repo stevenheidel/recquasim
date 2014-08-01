@@ -53,9 +53,11 @@ Vector h_kl(int n, int l, int k) {
   return result;
 }
 
-// TODO: Add random
 int j_kl() {
-  return 1;
+  if (rand() % 2 == 1)
+    return 1;
+  else
+    return -1;
 }
 
 Vector get_vector(int n, int dim) {

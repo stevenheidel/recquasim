@@ -1,6 +1,8 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 using namespace std;
 
@@ -9,9 +11,9 @@ using blaze::CompressedMatrix;
 using blaze::DynamicVector;
 using blaze::DenseSubvector;
 
-typedef complex<double>                  Element;
-typedef blaze::CompressedMatrix<Element> Matrix;
-typedef blaze::DynamicVector<Element>    Vector;
+typedef complex<double>                  Complex;
+typedef blaze::CompressedMatrix<Complex> Matrix;
+typedef blaze::DynamicVector<Complex>    Vector;
 typedef blaze::DenseSubvector<Vector>    Subvector;
 
 #endif
