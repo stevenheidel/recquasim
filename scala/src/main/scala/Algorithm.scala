@@ -12,14 +12,14 @@ object Algorithm {
     val m: Int = h_i.length
     val psi_0: IndexedSeq[Complex[Double]] = IndexedSeq.fill(m)(1.0 / sqrt(m))
 
-    val step = 1.0 / ninstal
+    val step: Double = 1.0 / ninstal
     var a = h_i * t * -1 * i
     val b = (h_f - h_i) * t * -1 * i
     var psi_in = psi_0.toVector
 
     for (k <- 1 to ninstal) {
-      psi_in = taylorInstallment(a, b, iter, psi_in, step);
-      //a = a + b * step
+      psi_in = taylorInstallment(a, b, iter, psi_in, step)
+      a = a + b * step
     }
 
     val psi = psi_in

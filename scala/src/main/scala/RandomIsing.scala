@@ -13,7 +13,7 @@ object RandomIsing {
     val result = DenseVector.zeros[Int](size)
 
     for (i <- 2 to n; j <- 1 until i) {
-      val j_kl = 1//if (Random.nextBoolean) 1 else -1
+      val j_kl = if (Random.nextBoolean) 1 else -1
       
       result -= h_kl(n, i, j) :* j_kl
     }

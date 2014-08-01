@@ -34,7 +34,7 @@ case class HybridMatrix(
 
   def *(b: Vector[Complex[Double]]): Vector[Complex[Double]] = {
     if (length != b.length)
-      throw new RuntimeException("Special matrix and special vector lengths must match")
+      throw new RuntimeException("Matrix and vector lengths must match")
     
     // Multiply the factors with the respective positions in the multiplying vector
     val withFactors = positions.map { x =>
@@ -46,11 +46,11 @@ case class HybridMatrix(
     else withFactors + (b, diagonal).zipped.map(_ * _)
   }
 
-  // TODO: Rewrite to include positions
   def +(b: HybridMatrix) = {
-    // This is unnecessary now
-    if (factor != 0 && b.factor != 0) 
-      throw new RuntimeException("Both special matrices have elements off the diagonal!")
+    // This check is not performed for speed reasons, it's up to you to make sure
+    // you're responsibly adding hybrid matrices
+    // if (factor != 0 && b.factor != 0 && positions != b.positions)
+    //   throw new RuntimeException("Both matrices have elements off the diagonal in different places")
 
     val newDiagonal = {
       if      (diagonal.isEmpty)   b.diagonal
