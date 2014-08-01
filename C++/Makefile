@@ -1,7 +1,7 @@
 TARGET = recquasim
-LIBS = -lm
+LIBS = -lm -llapack -lblas
 CC = g++
-CFLAGS = -g -Wall -Wextra -Werror -pedantic -std=c++11
+CCFLAGS = -g -Wall -Wextra -Werror -pedantic -std=c++11 -O1
 
 .PHONY: default all clean
 
@@ -13,8 +13,8 @@ all: default
 OBJECTS = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 HEADERS = $(wildcard *.h)
 
-%.o: %.c $(HEADERS)
-	$(CC) $(CFLAGS) -c $< -o $@
+%.o: %.cpp $(HEADERS)
+	$(CC) $(CCFLAGS) -c $< -o $@
 
 .PRECIOUS: $(TARGET) $(OBJECTS)
 

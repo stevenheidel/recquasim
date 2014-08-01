@@ -1,6 +1,6 @@
 
 
-object ZeroHamiltonian {
+object InitialHamiltonian {
   def construct(n: Int): HybridMatrix = {
     val size = Size(n)
     val positions = IndexedSeq.fill[collection.mutable.Buffer[Int]](size.dim)(collection.mutable.Buffer.empty)

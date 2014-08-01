@@ -5,13 +5,13 @@ object Main extends App {
     val t0 = System.nanoTime()
     val result = block    // call-by-name
     val t1 = System.nanoTime()
-    println("Elapsed time is " + (t1 - t0) / 1E9 + "seconds")
+    println("Elapsed time is " + (t1 - t0) / 1E9 + " seconds")
     result
   }
 
   val n = args(0).toInt
 
-  val h_i = time { ZeroHamiltonian.construct(n) }
+  val h_i = time { InitialHamiltonian.construct(n) }
   val h_f = time { RandomIsing.construct(n) }
   val t = 3.0
   val iter = 1000
