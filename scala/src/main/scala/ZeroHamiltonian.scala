@@ -1,36 +1,41 @@
 import specificlinalg._
-import scala.annotation.tailrec
 
 object ZeroHamiltonian {
   def construct(n: Int): HybridMatrix = {
-    HybridMatrix.initializeWithFunction(Size(n), -1) { (size: Size, coordinate: Coordinate) =>
-      recurse(size.dim, coordinate.x, coordinate.y)
+    val size = Size(n)
+    val positions = IndexedSeq.fill[collection.mutable.Buffer[Int]](size.dim)(collection.mutable.Buffer.empty)
+
+    recurse(size.dim, 0, 0) { (x, y, xOff, yOff) =>
+      positions(x + xOff) += y + yOff
     }
+    
+    HybridMatrix.withPositions(size, -1, positions)
   }
 
-  // Is there an element in the initial Hamiltonian that is n wide at (i, j)
-  @tailrec
-  def recurse(n: Int, i: Int, j: Int): Boolean = {
-    if (n == 2) {
-      // Pauli(1) Matrix
-      !(i == j)
+  def recurse(dim: Int, xOff: Int, yOff: Int)(add: (Int, Int, Int, Int) => Unit): Unit = {
+    if (dim == 2) {
+      // Pauli(1) matrix
+      add(0, 1, xOff, yOff)
+      add(1, 0, xOff, yOff)
     }
     else {
-      val half = n / 2
+      val half = dim / 2
 
-      val upper = i >= 0 && i < half
-      val left  = j >= 0 && j < half
+      // Upper left
+      recurse(half, xOff, yOff)(add)
 
-      if (upper && left) {
-        recurse(half, i, j)
+      // Upper right
+      (0 until half) map { i =>
+        add(i, i, xOff + half, yOff)
       }
-      else if (!upper && !left) {
-        recurse(half, i - half, j - half)
+
+      // Lower left
+      (0 until half) map { i =>
+        add(i, i, xOff, yOff + half)
       }
-      else {
-        // On the diagonal
-        (i - half == j || i == j - half)
-      }
+
+      // Lower right
+      recurse(half, xOff + half, yOff + half)(add)
     }
   }
 }

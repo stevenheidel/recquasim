@@ -7,10 +7,10 @@ object Main extends App {
     result
   }
 
-  val n = args(0).toInt
+  val n = 10//args(0).toInt
 
-  val h_i = time { ZeroHamiltonian.construct(n) }
-  val h_f = time { RandomIsing.construct(n) }
+  val h_i = ZeroHamiltonian.construct(n)
+  val h_f = RandomIsing.construct(n)
   val t = 3.0
   val iter = 1000
   val ninstal = 3

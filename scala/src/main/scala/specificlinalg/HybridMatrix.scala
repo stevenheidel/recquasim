@@ -7,8 +7,6 @@ case class Size(n: Int) {
   lazy val dim: Int = 2 ** n
 }
 
-case class Coordinate(x: Int, y: Int)
-
 /*
 Hybrid Matrix Requirements:
 - All elements off of the diagonal are the same element or zero
@@ -25,6 +23,7 @@ case class HybridMatrix(
 ) {
   val length = size.dim
 
+  // Scalar multiplication
   def *(b: Complex[Double]) = {
     copy(
       diagonal = b *: diagonal,
@@ -32,7 +31,8 @@ case class HybridMatrix(
     )
   }
 
-  def *(b: Vector[Complex[Double]]): Vector[Complex[Double]] = {
+  // Vector multiplication
+  def *(b: IndexedSeq[Complex[Double]]): Vector[Complex[Double]] = {
     if (length != b.length)
       throw new RuntimeException("Matrix and vector lengths must match")
     
@@ -43,7 +43,7 @@ case class HybridMatrix(
 
     // Then add on the diagonal
     if (diagonal.isEmpty) withFactors
-    else withFactors + (b, diagonal).zipped.map(_ * _)
+    else withFactors + (b, diagonal).zipped.map(_ * _).toVector
   }
 
   def +(b: HybridMatrix) = {
@@ -80,11 +80,7 @@ object HybridMatrix {
     HybridMatrix(size, diagonal.toVector, 0, Vector.empty)
   }
 
-  def initializeWithFunction(size: Size, factor: Complex[Double])(f: (Size, Coordinate) => Boolean) = {
-    val positions = IndexedSeq.tabulate(size.dim) { x =>
-      for (y <- (0 until size.dim); if f(size, Coordinate(x, y))) yield y
-    }
-
+  def withPositions(size: Size, factor: Complex[Double], positions: IndexedSeq[Seq[Int]]) = {
     HybridMatrix(size, Vector.empty, factor, positions)
   }
 }
