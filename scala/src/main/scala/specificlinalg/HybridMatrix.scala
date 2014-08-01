@@ -1,6 +1,5 @@
 package specificlinalg
 
-import spire.algebra._
 import spire.implicits._
 import spire.math._
 
@@ -11,7 +10,7 @@ case class Size(n: Int) {
 case class Coordinate(x: Int, y: Int)
 
 /*
-Specialized Matrix Requirements:
+Hybrid Matrix Requirements:
 - All elements off of the diagonal are the same element or zero
 - You need only to store the positions of the elements off the middle
 - Matrix needs to be symmetrical, row/column ordering is the same
@@ -22,14 +21,14 @@ case class HybridMatrix(
   size: Size, // Size of the matrix
   diagonal: Vector[Complex[Double]],
   factor: Complex[Double],
-  positions: Seq[Seq[Int]] // The positions of the factor in each row
+  positions: IndexedSeq[Seq[Int]] // The positions of the factor in each row
 ) {
   val length = size.dim
 
   def *(b: Complex[Double]) = {
     copy(
       diagonal = b *: diagonal,
-      factor = factor * b
+      factor = b * factor
     )
   }
 
@@ -37,7 +36,14 @@ case class HybridMatrix(
     if (length != b.length)
       throw new RuntimeException("Special matrix and special vector lengths must match")
     
-    ???
+    // Multiply the factors with the respective positions in the multiplying vector
+    val withFactors = positions.map { x =>
+      x.map(y => b(y)).qsum * factor
+    }.toVector
+
+    // Then add on the diagonal
+    if (diagonal.isEmpty) withFactors
+    else withFactors + (b, diagonal).zipped.map(_ * _)
   }
 
   // TODO: Rewrite to include positions
@@ -75,7 +81,7 @@ object HybridMatrix {
   }
 
   def initializeWithFunction(size: Size, factor: Complex[Double])(f: (Size, Coordinate) => Boolean) = {
-    val positions = Seq.tabulate(size.dim) { x =>
+    val positions = IndexedSeq.tabulate(size.dim) { x =>
       for (y <- (0 until size.dim); if f(size, Coordinate(x, y))) yield y
     }
 

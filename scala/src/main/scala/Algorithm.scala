@@ -1,5 +1,4 @@
 import specificlinalg._
-import spire.algebra._
 import spire.implicits._
 import spire.math._
 
@@ -32,7 +31,8 @@ object Algorithm {
       if (x.real == h_f_min)
     } yield y
 
-    Probability(psi_ind.toVector.norm.toDouble ** 2)
+    // Take the norm of the vector, then the norm of the complex result
+    Probability(psi_ind.toVector.norm.norm ** 2)
   }
 
   def taylorInstallment(a: HybridMatrix, b: HybridMatrix, iter: Int, psi_in: Vector[Complex[Double]], step: Double): Vector[Complex[Double]] = {
