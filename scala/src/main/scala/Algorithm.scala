@@ -1,11 +1,12 @@
 import specificlinalg._
+import spire.algebra._
 import spire.implicits._
 import spire.math._
 
-case class Probability(p: Complex[Double])
+case class Probability(p: Double)
 
 object Algorithm {
-  def withInstallments(h_i: SpecialMatrix, h_f: SpecialMatrix, t: Double, iter: Int, ninstal: Int): Probability = {
+  def withInstallments(h_i: HybridMatrix, h_f: HybridMatrix, t: Double, iter: Int, ninstal: Int): Probability = {
     // Imaginary number
     val i = Complex.i[Double]
 
@@ -15,18 +16,12 @@ object Algorithm {
     val step = 1.0 / ninstal
     var a = h_i * t * -1 * i
     val b = (h_f - h_i) * t * -1 * i
-    var psi_in = SpecialVector(psi_0)
+    var psi_in = psi_0.toVector
 
-    println(m)
-    println(step)
-    println(a)
-    println(b)
-    println(psi_in)
-
-    //for (k <- 1 to ninstal) {
+    for (k <- 1 to ninstal) {
       psi_in = taylorInstallment(a, b, iter, psi_in, step);
       //a = a + b * step
-    //}
+    }
 
     val psi = psi_in
 
@@ -37,19 +32,18 @@ object Algorithm {
       if (x.real == h_f_min)
     } yield y
 
-    val theNorm = sqrt(psi_ind.map(_ ** 2).toVector.qsum)
-    Probability(theNorm ** 2)
+    Probability(psi_ind.toVector.norm.toDouble ** 2)
   }
 
-  def taylorInstallment(a: SpecialMatrix, b: SpecialMatrix, iter: Int, psi_in: SpecialVector, step: Double): SpecialVector = {
+  def taylorInstallment(a: HybridMatrix, b: HybridMatrix, iter: Int, psi_in: Vector[Complex[Double]], step: Double): Vector[Complex[Double]] = {
     var psi_n_min_2 = psi_in
     var psi_n_min_1 = a * psi_in
-    var psi = psi_n_min_1 * step + psi_n_min_2
+    var psi = Complex(step, 0) *: psi_n_min_1 + psi_n_min_2
 
     for (n <- 2 to iter) {
-      val psi_n = (a * psi_n_min_1 + b * psi_n_min_2) * (1.0 / n)
+      val psi_n = Complex(1.0 / n, 0) *: (a * psi_n_min_1 + b * psi_n_min_2)
 
-      psi = psi + psi_n * (step ** n)
+      psi = psi + Complex(step ** n, 0) *: psi_n
       psi_n_min_2 = psi_n_min_1
       psi_n_min_1 = psi_n
     }

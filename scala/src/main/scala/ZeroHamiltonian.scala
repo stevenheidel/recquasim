@@ -2,11 +2,10 @@ import specificlinalg._
 import scala.annotation.tailrec
 
 object ZeroHamiltonian {
-  def construct(n: Int): SpecialMatrix = {
-    SpecialMatrix.noDiagonal(Size(n), -1, n)
-    /*FactorMatrix.initializeWithFunction(Size(n), -1) { (size: Size, coordinate: Coordinate) =>
+  def construct(n: Int): HybridMatrix = {
+    HybridMatrix.initializeWithFunction(Size(n), -1) { (size: Size, coordinate: Coordinate) =>
       recurse(size.dim, coordinate.x, coordinate.y)
-    }*/
+    }
   }
 
   // Is there an element in the initial Hamiltonian that is n wide at (i, j)

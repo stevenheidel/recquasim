@@ -4,8 +4,8 @@ object Main extends App {
   val h_i = ZeroHamiltonian.construct(n)
   val h_f = RandomIsing.construct(n)
   val t = 3.0
-  val iter = 1000
-  val ninstal = 3
+  val iter = 3
+  val ninstal = 1
 
   val result = Algorithm.withInstallments(h_i, h_f, t, iter, ninstal)
 

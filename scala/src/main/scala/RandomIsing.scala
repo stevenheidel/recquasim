@@ -3,8 +3,9 @@ import breeze.linalg._
 import scala.util.Random
 
 object RandomIsing {
-  def construct(n: Int): SpecialMatrix = {
-    SpecialMatrix.withDiagonal(Size(n), SpecialVector.fromDenseVector(denseVector(n)))
+  def construct(n: Int): HybridMatrix = {
+    import spire.math._
+    HybridMatrix.withDiagonal(Size(n), denseVector(n).toArray.map(x => Complex(x.toDouble, 0)))
   }
 
   def denseVector(n: Int): DenseVector[Int] = {
