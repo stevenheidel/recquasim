@@ -10,7 +10,6 @@ function H = InitialHamiltonian(N)
 
 %H = sparse([], [], [], dim, dim);
 
-    % TODO: Convert from for loop
     count = 1;
     for i = 1:dim
         for j = 1:dim

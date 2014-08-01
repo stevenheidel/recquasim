@@ -1,13 +1,17 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-#define ARMA_64BIT_WORD
-#define ARMA_DONT_USE_WRAPPER
-
 #include <iostream>
-#include <armadillo>
-
 using namespace std;
-using namespace arma;
+
+#include <blaze/Math.h>
+using blaze::CompressedMatrix;
+using blaze::DynamicVector;
+using blaze::DenseSubvector;
+
+typedef complex<double>                  Element;
+typedef blaze::CompressedMatrix<Element> Matrix;
+typedef blaze::DynamicVector<Element>    Vector;
+typedef blaze::DenseSubvector<Vector>    Subvector;
 
 #endif

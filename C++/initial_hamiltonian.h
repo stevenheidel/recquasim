@@ -3,6 +3,6 @@
 
 #include "main.h"
 
-sp_cx_mat initial_hamiltonian(int n);
+Matrix initial_hamiltonian(int n);
 
 #endif
