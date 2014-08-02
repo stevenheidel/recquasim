@@ -6,7 +6,7 @@
 N = str2num(argv(){1});
 T = 3;
 iter = 1000;
-ninstal = 3;
+ninstal = 5;
 
 % Sparse Hamiltonians
 tic;

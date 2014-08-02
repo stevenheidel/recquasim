@@ -34,7 +34,8 @@ psi_in = psi_0;
 
 % run recurrence
 for k = 1:ninstal
-    psi_in = Taylor_installment(A, B, iter, psi_in, step);
+    %psi_in = Taylor_installment(A, B, iter, psi_in, step);
+    psi_in = Taylor_installment_stopper(A, B, psi_in, step, 1e-40);
     A = A + step*B;
 end
 psi = psi_in;

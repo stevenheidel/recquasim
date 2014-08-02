@@ -44,7 +44,7 @@ end
 function result = isValue(dim, i, j)
     if dim == 2
       % Pauli(1) Matrix
-      result = !(i == j);
+      result = ~(i == j);
     else
         half = dim / 2;
 
@@ -54,7 +54,7 @@ function result = isValue(dim, i, j)
 
         if uppe && left
             result = isValue(half, i, j);
-        elseif !uppe && !left
+        elseif ~uppe && ~left
             result = isValue(half, i - half, j - half);
         else
             % On the diagonal

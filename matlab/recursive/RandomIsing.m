@@ -4,24 +4,24 @@
 function H = RandomIsing(N)
     dim = 2^N;
     B = getDiagonal(N);
-    d = [0];
+    d = 0;
 
     H = spdiags(B, d, dim, dim);
 end
 
 % Just the diagonal
-function diagonal = getDiagonal(N)
+function dia = getDiagonal(N)
     dim = 2^N;
-    diagonal = zeros(dim, 1);
+    dia = zeros(dim, 1);
 
     for i = 2:N
         for j = 1:(i-1)
-            diagonal -= j_kl() * h_kl(N, i, j);
+            dia = dia - j_kl() * h_kl(N, i, j);
         end
     end
 
     % Check correctness
-    % isequal(diagonal, diag(unoptimized(N)))
+    % isequal(dia, diag(unoptimized(N)))
 end
 
 % Return either -1 or 1
