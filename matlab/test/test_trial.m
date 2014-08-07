@@ -10,6 +10,14 @@ epsilon = eps(1);
 H_i = InitialHamiltonian(N);
 H_f = RandomIsing(N);
 
-[P, ~] = P_installments(H_i, H_f, T, ninstal, epsilon);
+tic;
+[P, ~] = P_distributed(H_i, H_f, T, ninstal, epsilon);
+toc
 
 P
+
+cd ..
+tic;
+single_trial
+toc
+cd test

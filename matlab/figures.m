@@ -1,7 +1,7 @@
 % Parameters
 
 % Figure 1
-runs = 500000;
+runs = 50%0000;
 N = 8;
 T = 4;
 ninstal = 4;
@@ -11,12 +11,8 @@ epsilon = eps(1);
 
 H_i = InitialHamiltonian(N);
 
-function p = runner(H_i, T, ninstal, epsilon, N)
-    H_f = RandomIsing(N);
-    [p, ~] = P_installments(H_i, H_f, T, ninstal, epsilon);
-end
-
-P = pararrayfun(4, @(x) runner(H_i, T, ninstal, epsilon, N), 1:runs);
+addpath(genpath('/test/'));
+P = pararrayfun(4, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon, N), 1:runs);
 
 non_divergers = sum(P > 1)
 hist(P.*(P<1), 1/32:1/32:1-1/32)
