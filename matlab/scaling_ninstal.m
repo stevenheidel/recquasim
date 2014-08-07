@@ -5,10 +5,11 @@
 runs_each = 100;
 standard_of_convergence = 95;
 
-N_range = 12:15;
-T_range = 1:20;
+N_range = 14;
+T_range = 16:20;
 ninstal_max = 50;
 
+processors = 4;
 epsilon = eps(1);
 
 % Experiment
@@ -18,7 +19,7 @@ load('scaling_ninstal.mat', 'X');
 tic;
 for N = N_range
     H_i = InitialHamiltonian(N);
-    ninstal = 1;
+    ninstal = 15; % TODO: Change back to 1
 
     for T = T_range
         % Go back 1 in case got unlucky
@@ -26,7 +27,7 @@ for N = N_range
 
         while ninstal < ninstal_max
             fprintf('Trying N=%i, T=%i with ninstal=%i\n', N, T, ninstal);
-            P = pararrayfun(8, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon)(1), 1:runs_each);
+            P = pararrayfun(processors, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon)(1), 1:runs_each);
 
             num_converge = sum(P <= 1);
             if num_converge > standard_of_convergence

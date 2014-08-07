@@ -5,6 +5,8 @@ runs = 20000;
 N = 12;
 T = 14;
 ninstal = 14;
+
+processors = 8;
 epsilon = eps(1);
 
 % Experiment
@@ -12,7 +14,7 @@ epsilon = eps(1);
 H_i = InitialHamiltonian(N);
 
 tic;
-P = pararrayfun(8, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon)(1), 1:runs);
+P = pararrayfun(processors, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon)(1), 1:runs);
 toc
 
 num_divergers = sum(P > 1)
