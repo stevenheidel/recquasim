@@ -1,6 +1,6 @@
 % Parameters
 
-N = 15;
+N = 1;
 T = 3;
 ninstal = 3;
 epsilon = eps(1);
@@ -15,7 +15,3 @@ tic;
 toc
 
 P
-
-% 20
-% installments - 2:42.52 - 2802976
-% distribute - 1:40.14 - 1111588

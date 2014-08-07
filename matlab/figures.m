@@ -1,10 +1,10 @@
 % Parameters
 
-% Figure 1
-runs = 500000;
-N = 8;
-T = 4;
-ninstal = 4;
+% Figure 6
+runs = 20000;
+N = 12;
+T = 14;
+ninstal = 14;
 epsilon = eps(1);
 
 % Experiment
@@ -12,9 +12,9 @@ epsilon = eps(1);
 H_i = InitialHamiltonian(N);
 
 tic;
-P = pararrayfun(4, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon, N), 1:runs);
+P = pararrayfun(8, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon)(1), 1:runs);
 toc
 
-non_divergers = sum(P > 1)
+num_divergers = sum(P > 1)
 hist(P.*(P<1), 1/32:1/32:1-1/32)
 title(sprintf('Histogram: success probability for Schrodinger %i qubits, T=%i, ~%i runs', N, T, runs))
