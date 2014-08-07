@@ -1,16 +1,7 @@
-function [P, psi] = P_installments(H_i, H_f, T, iter, ninstal)
+function [P, psi] = P_installments(H_i, H_f, T, ninstal, epsilon)
 
 % Calculate the probability of success for an adiabatic process
 % using the method of analytic series expansion in ninstal steps
-
-% N = number of quibits, e.g. N = 8
-% Input is as follows (N and T and iter may be adjusted 
-% but must ensure convergence):
-
-% H_i = zero_time_Hamiltonian(N);
-% H_f = random_Ising(N);
-% T = 3;
-% iter = 1000
 
 % Find the initial state -- the ground state of H_i
 
@@ -34,8 +25,7 @@ psi_in = psi_0;
 
 % run recurrence
 for k = 1:ninstal
-    %psi_in = Taylor_installment(A, B, iter, psi_in, step);
-    psi_in = Taylor_installment_stopper(A, B, psi_in, step, 1e-40);
+    psi_in = Taylor_installment_stopper(A, B, psi_in, step, epsilon);
     A = A + step*B;
 end
 psi = psi_in;
