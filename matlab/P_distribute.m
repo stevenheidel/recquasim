@@ -1,4 +1,4 @@
-function [P, psi] = P_distributed(H_i, H_f, T, ninstal, epsilon)
+function [P, psi] = P_distribute(H_i, H_f, T, ninstal, epsilon)
 
 % Calculate the probability of success for an adiabatic process
 % using the method of analytic series expansion in ninstal steps
@@ -23,14 +23,14 @@ psi_in = psi_0;
 
 % run recurrence
 for k = 1:ninstal
-    psi_in = Taylor_installment_distributed(H_i, H_f, T, psi_in, step, epsilon, k);
+    psi_in = Taylor_installment_distribute(H_i, H_f, T, psi_in, step, epsilon, k);
 end
 psi = psi_in;
 P = norm(psi(ind))^2;
 
 end
 
-function psi_fin = Taylor_installment_distributed(H_i, H_f, T, psi_in, step, tol, installment)
+function psi_fin = Taylor_installment_distribute(H_i, H_f, T, psi_in, step, tol, installment)
 
 % self-evaluating and self-stopping version of Taylor_installment
 % Calculate Taylor series of the solution of d psi/ds = (A+ sB)psi, 
