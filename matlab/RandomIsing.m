@@ -1,4 +1,4 @@
-% Optimized (Pure Sparse Version)
+% Optimized
 
 % Returns a sparse matrix
 function H = RandomIsing(N)

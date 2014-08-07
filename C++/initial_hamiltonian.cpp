@@ -1,38 +1,35 @@
 #include "initial_hamiltonian.h"
 
-void add(Matrix* H, int x, int y, int xOff, int yOff) {
-  (*H).insert(x + xOff, y + yOff, -1);
+void add(Matrix* H, int x, int y) {
+  (*H).append(x , y, -1);
 
   return;
 }
 
-void recurse(Matrix* H, int dim, int xOff, int yOff) {
-  if (dim == 2) {
-    // Pauli(1) matrix
-    add(H, 0, 1, xOff, yOff);
-    add(H, 1, 0, xOff, yOff);
-  }
-  else {
-    int half = dim / 2;
-
-    // Upper left
-    recurse(H, half, xOff, yOff);
-
-    // Upper right
-    for (int i = 0; i < half; i++) {
-      add(H, i, i, xOff + half, yOff);
+void recurse(Matrix* H, int global_row, int row, int col_offset, int n) {
+    bool up = row % 2 == 0;
+    int dim = 1 << n;
+    
+    if (n == 1) {
+        if (up) add(H, global_row, col_offset + 1);
+        else add(H, global_row, col_offset);
     }
-
-    // Lower left
-    for (int i = 0; i < half; i++) {
-      add(H, i, i, xOff, yOff + half);
+    else {
+        int half = dim / 2;
+        int ident_col = row % half;
+        // Top half
+        if (row < half) {
+            recurse(H, global_row, row, col_offset, n-1);
+            add(H, global_row, col_offset + ident_col + half);
+        }
+        // Bottom half
+        else {
+            add(H, global_row, col_offset + ident_col);
+            recurse(H, global_row, row % half, col_offset + half, n-1);
+        }
     }
-
-    // Lower right
-    recurse(H, half, xOff + half, yOff + half);
-  }
-
-  return;
+    
+    return;
 }
 
 Matrix initial_hamiltonian(int n) {
@@ -43,7 +40,11 @@ Matrix initial_hamiltonian(int n) {
 
   H.reserve(n_non_zero);
 
-  recurse(&H, dim, 0, 0);
+  for (int i = 0; i < dim; i++) {
+    //H.reserve(n, i);
+    recurse(&H, i, i, 0, n);
+    H.finalize(i);
+  }
 
   return H;
 }

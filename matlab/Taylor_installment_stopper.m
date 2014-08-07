@@ -25,7 +25,6 @@ while (nrm_cor > tol)
     psi_n_min_1 = psi_n;
 end
 
-n 
 psi_fin = psi;
     
 % Copyright (c) Artur Sowa, December 2013    
