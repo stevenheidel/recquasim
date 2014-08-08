@@ -5,11 +5,12 @@
 runs_each = 100;
 standard_of_convergence = 95;
 
-N_range = 15:16;
-T_range = 1:20;
+N_range = 16;
+T_range = 8:20;
+ninstal_min = 8;
 ninstal_max = 50;
 
-processors = 4;
+processors = 8;
 epsilon = eps(1);
 
 % Experiment
@@ -19,7 +20,7 @@ load('scaling_ninstal.mat', 'X');
 tic;
 for N = N_range
     H_i = InitialHamiltonian(N);
-    ninstal = 1;
+    ninstal = ninstal_min;
 
     for T = T_range
         % Go back 1 in case got unlucky

@@ -1,7 +1,7 @@
 % Start by loading the matrix
 load('scaling_ninstal.mat', 'X');
 
-n_range = 2:14;
+n_range = 2:15;
 t_range = 1:20;
 
 N = [];
