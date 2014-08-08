@@ -1,6 +1,6 @@
 % Parameters
 
-N = 1;
+N = 10;
 T = 3;
 ninstal = 3;
 epsilon = eps(1);
@@ -11,7 +11,7 @@ H_i = InitialHamiltonian(N);
 H_f = RandomIsing(N);
 
 tic;
-[P, ~] = P_distribute(H_i, H_f, T, ninstal, epsilon);
+P = P_distribute(H_i, H_f, T, ninstal, epsilon);
 toc
 
 P

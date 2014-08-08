@@ -23,7 +23,7 @@ psi_in = psi_0;
 
 % run recurrence
 for k = 1:ninstal
-    psi_in = Taylor_installment_distribute(H_i, diag(H_f), T, psi_in, step, epsilon, k);
+    psi_in = Taylor_installment_distribute(H_i, h_f, T, psi_in, step, epsilon, k);
 end
 
 psi = psi_in;

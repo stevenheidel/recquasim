@@ -14,7 +14,7 @@ epsilon = eps(1);
 H_i = InitialHamiltonian(N);
 
 tic;
-P = pararrayfun(processors, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon)(1), 1:runs);
+P = pararrayfun(processors, @(x) P_distribute(H_i, RandomIsing(N), T, ninstal, epsilon), 1:runs);
 toc
 
 num_divergers = sum(P > 1)

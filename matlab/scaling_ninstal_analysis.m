@@ -1,7 +1,7 @@
 % Start by loading the matrix
 load('scaling_ninstal.mat', 'X');
 
-n_range = 2:15;
+n_range = 2:16;
 t_range = 1:20;
 
 N = [];
@@ -16,15 +16,13 @@ for n = n_range
     end
 end
 
-% scatter(N, T, ninstal)
+addpath('./PolyfitnTools');
 
-% addpath('./PolyfitnTools');
+p = polyfitn([N,T], ninstal, 2);
+p.ModelTerms
+p.Coefficients
 
-% p = polyfitn([N,T], ninstal, 2);
-% p.ModelTerms
-% p.Coefficients
-
-%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%
 
 % figure
 % coef = [];
@@ -65,5 +63,5 @@ end
 %     ylabel('ninstal');
 % end
 
-% figure
-% plot(coef)
+% % figure
+% % plot(coef)
