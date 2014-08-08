@@ -18,52 +18,52 @@ end
 
 % scatter(N, T, ninstal)
 
-addpath('./PolyfitnTools');
+% addpath('./PolyfitnTools');
 
-p = polyfitn([N,T], ninstal, 2);
-p.ModelTerms
-p.Coefficients
+% p = polyfitn([N,T], ninstal, 2);
+% p.ModelTerms
+% p.Coefficients
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 
-figure
-coef = [];
+% figure
+% coef = [];
 
-for n=n_range
-    x_axis = t_range;
-    y_axis = X(n, t_range);
+% for n=n_range
+%     x_axis = t_range;
+%     y_axis = X(n, t_range);
 
-    [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
-    coef = [coef; p];
-    p_fit = polyval(p,x_axis,ErrorEst);
+%     [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
+%     coef = [coef; p];
+%     p_fit = polyval(p,x_axis,ErrorEst);
 
-    subplot(4,5,n-1);
-    plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
-    title(sprintf('N=%i', n));
-    xlabel('T');
-    ylabel('ninstal');
-end
+%     subplot(4,5,n-1);
+%     plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
+%     title(sprintf('N=%i', n));
+%     xlabel('T');
+%     ylabel('ninstal');
+% end
+
+% % figure
+% % plot(coef)
 
 % figure
-% plot(coef)
+% coef = [];
 
-figure
-coef = [];
+% for t=t_range
+%     x_axis = n_range;
+%     y_axis = X(n_range, t)' / t;
 
-for t=t_range
-    x_axis = n_range;
-    y_axis = X(n_range, t)';
+%     [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
+%     coef = [coef; p];
+%     p_fit = polyval(p,x_axis,ErrorEst);
 
-    [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
-    coef = [coef; p];
-    p_fit = polyval(p,x_axis,ErrorEst);
-
-    subplot(4,5,t);
-    plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
-    title(sprintf('T=%i', t));
-    xlabel('N');
-    ylabel('ninstal');
-end
+%     subplot(4,5,t);
+%     plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
+%     title(sprintf('T=%i', t));
+%     xlabel('N');
+%     ylabel('ninstal');
+% end
 
 % figure
 % plot(coef)

@@ -5,12 +5,12 @@
 runs_each = 100;
 standard_of_convergence = 95;
 
-N_range = 16;
-T_range = 8:20;
-ninstal_min = 8;
+N_range = 17;
+T_range = 1:7;
+ninstal_min = 1;
 ninstal_max = 50;
 
-processors = 8;
+processors = 2;
 epsilon = eps(1);
 
 % Experiment
