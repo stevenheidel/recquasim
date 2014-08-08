@@ -1,42 +1,69 @@
 % Start by loading the matrix
 load('scaling_ninstal.mat', 'X');
 
-% N = [];
-% T = [];
-% ninstal = [];
+n_range = 2:14;
+t_range = 1:20;
 
-% for n = 1:20
-%     for t = 1:20
-%         N = [N n];
-%         T = [T t];
-%         ninstal = [ninstal X(n, t)];
-%     end
-% end
+N = [];
+T = [];
+ninstal = [];
+
+for n = n_range
+    for t = t_range
+        N = [N; n];
+        T = [T; t];
+        ninstal = [ninstal; X(n, t)];
+    end
+end
 
 % scatter(N, T, ninstal)
 
+addpath('./PolyfitnTools');
+
+p = polyfitn([N,T], ninstal, 2);
+p.ModelTerms
+p.Coefficients
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
 figure
+coef = [];
 
-% for n=1:16
-%     x_axis = 1:20;
-%     y_axis = X(n, :);
-
-%     [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
-%     p_fit = polyval(p,x_axis,ErrorEst);
-
-%     subplot(4,4,n);
-%     plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
-%     title(sprintf('N=%i', n);
-% end
-
-for t=1:20
-    x_axis = 1:14;
-    y_axis = X(:, t)'(1:14);
+for n=n_range
+    x_axis = t_range;
+    y_axis = X(n, t_range);
 
     [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
+    coef = [coef; p];
     p_fit = polyval(p,x_axis,ErrorEst);
 
-    subplot(5,4,t);
+    subplot(4,5,n-1);
+    plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
+    title(sprintf('N=%i', n));
+    xlabel('T');
+    ylabel('ninstal');
+end
+
+% figure
+% plot(coef)
+
+figure
+coef = [];
+
+for t=t_range
+    x_axis = n_range;
+    y_axis = X(n_range, t)';
+
+    [p,ErrorEst] = polyfit(x_axis, y_axis, 2);
+    coef = [coef; p];
+    p_fit = polyval(p,x_axis,ErrorEst);
+
+    subplot(4,5,t);
     plot(x_axis,p_fit,'-',x_axis,y_axis,'+');
     title(sprintf('T=%i', t));
+    xlabel('N');
+    ylabel('ninstal');
 end
+
+% figure
+% plot(coef)
