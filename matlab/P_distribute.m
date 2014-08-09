@@ -9,7 +9,7 @@ function [P, psi] = P_distribute(H_i, H_f, T, ninstal, epsilon)
 % (numerical observation)
 
 [m, ~] = size(H_i);
-psi_0 = (1/sqrt(m))*ones(m,1);
+psi_0 = (-1/sqrt(m))*ones(m,1);
 
 % Find the desired final ground state SPACE of H_f (degenerate ground state)
 
