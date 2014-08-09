@@ -1,12 +1,12 @@
 % Parameters
 
-% Figure 5
-runs = 1000;
-N = 12;
-T = 10;
-ninstal = 10;
+% Figure 3
+runs = 500000;
+N = 8;
+T = 4;
+ninstal = 2;
 
-processors = 8;
+processors = 4;
 epsilon = eps(1);
 
 % Experiment

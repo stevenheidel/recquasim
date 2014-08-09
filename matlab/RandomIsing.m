@@ -18,7 +18,7 @@ function [H, J, num_solutions] = RandomIsing(N, J)
 
     if ~exist('J', 'var')
         J = 2 * rand(N) - 1;
-        %J = 2 * randi(2, N) - 3;
+        % J = 2 * randi(2, N) - 3;
         J = triu(J);
     end
 
