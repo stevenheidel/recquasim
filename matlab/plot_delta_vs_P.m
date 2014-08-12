@@ -1,8 +1,8 @@
 % Parameters
 
-N = 3;
-T = 3;
-ninstal = 3;
+N = 2;
+T = 5;
+ninstal = 1;
 
 N_points = 1000;
 N_delta = 100;
@@ -23,7 +23,7 @@ while k <= N_points
         P = P_distribute(H_i, H_f, T, ninstal, epsilon);
 
         if P < 1
-            scatter(delta, P, pointsize);
+            scatter(delta, P, pointsize, mean(diag(J)));
             axis([0 2 0 1]);
             hold on; drawnow
 

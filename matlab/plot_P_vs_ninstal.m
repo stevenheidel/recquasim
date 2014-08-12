@@ -4,7 +4,7 @@ N = 10;
 T = 20;
 ninstal_min = 6;
 
-N_points = 10;
+N_points = 1000;
 pointsize = 10;
 
 epsilon = eps(1);

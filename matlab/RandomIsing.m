@@ -8,6 +8,9 @@ function [H, J, num_solutions] = RandomIsing(N, J)
     % Construct the Ising Hamiltonan on N qubits
     % H_f = -sum_{l<k} J_{lk} sigma^z_l tensor sigma^z_k - sum_l h_l sigma^z_l
 
+    % Include second term or not
+    second_term = false;
+
     % Initialize a matrix of all zeros
     dim = 2^N;
     H = sparse([], [], [], dim, dim);
@@ -17,9 +20,15 @@ function [H, J, num_solutions] = RandomIsing(N, J)
     p3 = sparse([1 0; 0 -1]);
 
     if ~exist('J', 'var')
-        J = 2 * rand(N) - 1;
-        % J = 2 * randi(2, N) - 3;
-        J = triu(J);
+        % J_kl are integers in {-1, 1}
+        J = 2 * randi(2, N) - 3;
+        J = triu(J, 1);
+
+        if second_term
+            % h are reals in [-1, 1], placed along the unused diagonal of J
+            h = 2 * rand(N, 1) - 1;
+            J = J + diag(h);
+        end
     end
 
     p0_list = cell(N);
@@ -50,7 +59,7 @@ function [H, J, num_solutions] = RandomIsing(N, J)
 
         H_l = tensor_list(op_list);
 
-        % multiply with random h_l, stored in J down the unused diagonal
+        % multiply with random h_l, stored in J's diagonal
         H = H - J(l, l) * H_l;
     end
 

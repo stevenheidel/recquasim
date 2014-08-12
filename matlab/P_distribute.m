@@ -23,12 +23,21 @@ psi_in = psi_0;
 
 % run recurrence
 for k = 1:ninstal
-    psi_in = Taylor_installment_distribute(H_i, h_f, T, psi_in, step, epsilon, k);
+    psi_in = Taylor_installment_distribute_accelerated(H_i, h_f, T, psi_in, step, epsilon, k);
 end
 
 psi = psi_in;
 P = norm(psi(ind))^2;
 
+end
+
+function psi_fin = Taylor_installment_distribute_accelerated(H_i, H_f_diag, T, psi_in, step, tol, installment)
+    % Must be complex array of doubles
+    psi_in = complex(psi_in);
+    
+    psi_fin = Taylor_mex(H_f_diag, T, psi_in, step, tol, installment)
+
+    psi_fin = psi_in;
 end
 
 function psi_fin = Taylor_installment_distribute(H_i, H_f_diag, T, psi_in, step, tol, installment)

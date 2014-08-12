@@ -1,8 +1,8 @@
 % Parameters
 
-N = 10;
+N = 3;
 T = 3;
-ninstal = 3;
+ninstal = 1;
 epsilon = eps(1);
 
 % Experiment
