@@ -1,4 +1,5 @@
 #include "mex.h"
+#include <math.h>
 
 // Multiply a vector by H_i using magic multiply
 void multiply_by_h_i(int dim, double* input_r, double* input_i, double* output_r, double* output_i) {
@@ -15,6 +16,12 @@ void multiply_by_h_i(int dim, double* input_r, double* input_i, double* output_r
                 out = j * dim + i;
                 in = (j % 2 == 0 ? out + dim : out - dim);
 
+                // First iteration so set to 0
+                if (m == 2) {
+                    output_r[out] = 0;
+                    output_i[out] = 0;
+                }
+
                 // -= because all entries in H_i contain -1
                 output_r[out] -= input_r[in];
                 output_i[out] -= input_i[in];
@@ -26,10 +33,10 @@ void multiply_by_h_i(int dim, double* input_r, double* input_i, double* output_r
 }
 
 // Multiply a vector by H_f
-void multiply_by_h_f(int dim, double* h_f_r, double* input_r, double* input_i, double* output_r, double* output_i) {
+void multiply_by_h_f(int dim, double* h_f, double* input_r, double* input_i, double* output_r, double* output_i) {
     for (int i = 0; i < dim; i++) {
-        output_r[i] = h_f_r[i] * input_r[i];
-        output_i[i] = h_f_r[i] * input_i[i];
+        output_r[i] = h_f[i] * input_r[i];
+        output_i[i] = h_f[i] * input_i[i];
     }
 
     return;
@@ -114,11 +121,6 @@ f_by_min_2 = f_by_psi_in;
     double* psi_n_r = mxGetPr(psi_n_mx);
     double* psi_n_i = mxGetPi(psi_n_mx);
 
-    // cor
-    mxArray* cor_mx = mxCreateNumericArray(1, dims, mxDOUBLE_CLASS, mxCOMPLEX);
-    double* cor_r = mxGetPr(cor_mx);
-    double* cor_i = mxGetPi(cor_mx);
-
     // i_by_min_2
     mxArray* i_by_min_2_mx = mxCreateNumericArray(1, dims, mxDOUBLE_CLASS, mxCOMPLEX);
     double* i_by_min_2_r = mxGetPr(i_by_min_2_mx);
@@ -152,6 +154,14 @@ f_by_min_2 = f_by_psi_in;
         // psi = psi_n_min_1 * step + psi_n_min_2
         psi_r[i] = psi_n_min_1_r[i] * step + psi_n_min_2_r[i];
         psi_i[i] = psi_n_min_1_i[i] * step + psi_n_min_2_i[i];
+
+        // i_by_min_2 = i_by_psi_in
+        i_by_min_2_r[i] = i_by_psi_in_r[i];
+        i_by_min_2_i[i] = i_by_psi_in_i[i];
+
+        // f_by_min_2 = f_by_psi_in;
+        f_by_min_2_r[i] = f_by_psi_in_r[i];
+        f_by_min_2_i[i] = f_by_psi_in_i[i];
     }
 
 /*
@@ -159,10 +169,13 @@ nrm_cor = 1;
 n = 1;
 */
 
-    // Needed later for MATLAB call
-    mxArray* nrm_cor_mx = mxCreateDoubleScalar(0);
-    mxArray* norm_input[] = {cor_mx};
-    mxArray* norm_output[] = {nrm_cor_mx};
+    // Needed later for swapping memory
+    double* temp;
+
+    // Needed later for calculating norm
+    double cor_sum = 0;
+    double cor_r;
+    double cor_i;
 
     double nrm_cor = 1;
     double n = 1;
@@ -180,60 +193,76 @@ n = n+1;
         stepn = stepn * step;
 
     /*
-    i_by_min_1 = H_i * psi_n_min_1;
-    f_by_min_1 = H_f_diag .* psi_n_min_1;
+    i_by_min_1 = H_i * psi_n_min_1
+    f_by_min_1 = H_f_diag .* psi_n_min_1
     */
 
         multiply_by_h_i(dim, psi_n_min_1_r, psi_n_min_1_i, i_by_min_1_r, i_by_min_1_i);
         multiply_by_h_f(dim, h_f, psi_n_min_1_r, psi_n_min_1_i, f_by_min_1_r, f_by_min_1_i);
 
-    /*
-    psi_n = (c/n)*((1-d) * i_by_min_1 + d * f_by_min_1 + f_by_min_2 - i_by_min_2)
-    cor = psi_n*step^n;
-    
-    psi = psi + cor;
-    */
-
+        cor_sum = 0;
         for (int i = 0; i < dim; i++) {
-            // TODO
+
+        /*
+        psi_n = (c/n)*((1-d) * i_by_min_1 + d * f_by_min_1 + f_by_min_2 - i_by_min_2)
+        cor = psi_n*step^n;
+        
+        psi = psi + cor;
+        */
+
             psi_n_r[i] = (c_i / n) * ((1 - d) * i_by_min_1_i[i] + d * f_by_min_1_i[i] + f_by_min_2_i[i] - i_by_min_2_i[i]) * -1;
             psi_n_i[i] = (c_i / n) * ((1 - d) * i_by_min_1_r[i] + d * f_by_min_1_r[i] + f_by_min_2_r[i] - i_by_min_2_r[i]);
 
-            cor_r[i] = psi_n_r[i] * stepn;
-            cor_i[i] = psi_n_i[i] * stepn;
+            cor_r = psi_n_r[i] * stepn;
+            cor_i = psi_n_i[i] * stepn;
 
-            psi_r[i] += cor_r[i];
-            psi_i[i] += cor_i[i];
+            psi_r[i] += cor_r;
+            psi_i[i] += cor_i;
+
+            cor_sum += cor_r * cor_r + cor_i * cor_i;
         }
 
     /*
     nrm_cor = norm(cor);
     */
 
-        mexCallMATLAB(1, norm_output, 1, norm_input, "norm");
-        nrm_cor = mxGetScalar(nrm_cor_mx);
+        nrm_cor = sqrt(cor_sum);
 
     /*
     psi_n_min_2 = psi_n_min_1;
     psi_n_min_1 = psi_n;
+    */
 
+        // 3-way swap of psi_n_2, psi_n_min_1, and psi_n
+        temp = psi_n_min_2_r;
+        psi_n_min_1_r = psi_n_r;
+        psi_n_min_2_r = psi_n_min_1_r;
+        psi_n_r = temp;
+        temp = psi_n_min_2_i;
+        psi_n_min_1_i = psi_n_i;
+        psi_n_min_2_i = psi_n_min_1_i;
+        psi_n_i = temp;
+
+    /*
     i_by_min_2 = i_by_min_1;
     f_by_min_2 = f_by_min_1;
     */
 
-        for (int i = 0; i < dim; i++) {
-            psi_n_min_2_r[i] = psi_n_min_1_r[i];
-            psi_n_min_2_i[i] = psi_n_min_1_i[i];
+        // Swap memory positions for i_by_min_1 and i_by_min_2
+        temp = i_by_min_1_r;
+        i_by_min_1_r = i_by_min_2_r; // will be overwritten
+        i_by_min_2_r = temp; // source of recursion
+        temp = i_by_min_1_i;
+        i_by_min_1_i = i_by_min_2_i; // will be overwritten
+        i_by_min_2_i = temp; // source of recursion
 
-            psi_n_min_1_r[i] = psi_n_r[i];
-            psi_n_min_1_i[i] = psi_n_i[i];
-
-            i_by_min_2_r[i] = i_by_min_1_r[i];
-            i_by_min_2_i[i] = i_by_min_1_i[i];
-
-            f_by_min_2_r[i] = f_by_min_1_r[i];
-            f_by_min_2_i[i] = f_by_min_1_i[i];
-        }
+        // Swap memory positions for f_by_min_1 and f_by_min_2
+        temp = f_by_min_1_r;
+        f_by_min_1_r = f_by_min_2_r; // will be overwritten
+        f_by_min_2_r = temp; // source of recursion
+        temp = f_by_min_1_i;
+        f_by_min_1_i = f_by_min_2_i; // will be overwritten
+        f_by_min_2_i = temp; // source of recursion
     }
 
 /*
@@ -254,8 +283,6 @@ psi_fin = psi;
     mxDestroyArray(i_by_min_1_mx);
     mxDestroyArray(f_by_min_2_mx);
     mxDestroyArray(f_by_min_1_mx);
-
-    mxDestroyArray(cor_mx);
 
     return;
 }

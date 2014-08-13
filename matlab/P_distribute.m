@@ -13,7 +13,7 @@ psi_0 = (-1/sqrt(m))*ones(m,1);
 
 % Find the desired final ground state SPACE of H_f (degenerate ground state)
 
-h_f = diag(H_f); % H_f is diagonal so all eigenvecotrs are e_n where n \in ind
+h_f = full(diag(H_f)); % H_f is diagonal so all eigenvecotrs are e_n where n \in ind
 ind = (h_f == min(h_f)); % this is a sufficient description of the projector 
                          % -- see last lines of this code
 
@@ -21,23 +21,33 @@ ind = (h_f == min(h_f)); % this is a sufficient description of the projector
 step = 1/ninstal;
 psi_in = psi_0;
 
-% run recurrence
+% TEST C++ VERSION
+tic;
+psi_in_mx = psi_0;
 for k = 1:ninstal
-    psi_in = Taylor_installment_distribute_accelerated(H_i, h_f, T, psi_in, step, epsilon, k);
+    psi_in_mx = Taylor_installment_distribute_accelerated(H_i, h_f, T, psi_in_mx, step, epsilon, k);
 end
+toc
+psi = psi_in_mx;
+P = norm(psi(ind))^2
+
+% run recurrence
+tic;
+for k = 1:ninstal
+    psi_in = Taylor_installment_distribute(H_i, h_f, T, psi_in, step, epsilon, k);
+end
+toc
 
 psi = psi_in;
 P = norm(psi(ind))^2;
 
 end
 
-function psi_fin = Taylor_installment_distribute_accelerated(H_i, H_f_diag, T, psi_in, step, tol, installment)
+function psi_fin= Taylor_installment_distribute_accelerated(H_i, H_f_diag, T, psi_in, step, tol, installment)
     % Must be complex array of doubles
     psi_in = complex(psi_in);
-    
-    psi_fin = Taylor_mex(H_f_diag, T, psi_in, step, tol, installment)
 
-    psi_fin = psi_in;
+    psi_fin = Taylor_mex(H_f_diag, T, psi_in, step, tol, installment);
 end
 
 function psi_fin = Taylor_installment_distribute(H_i, H_f_diag, T, psi_in, step, tol, installment)
@@ -70,6 +80,7 @@ n = 1;
 i_by_min_2 = i_by_psi_in;
 f_by_min_2 = f_by_psi_in;
 
+%for i=1:2
 while (nrm_cor > tol)
     n = n+1;
 

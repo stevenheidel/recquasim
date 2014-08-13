@@ -1,9 +1,33 @@
 % Optimized
 
+function H = RandomIsing(N)
+    dim=2^N;
+    vals=zeros(1,dim/2);
+
+    for k=1:N-1
+        temp=zeros(1,dim/2^k);
+        for r=k+1:N
+            mac=[ones(1,dim/2^r) -ones(1,dim/2^r)];
+            for p=1:r-(k+1)
+                mac=[mac mac];
+            end
+            signo=2*randi(2,1)-3;
+            temp=temp+signo*mac;
+        end
+        for p=1:k-1
+            temp=[temp fliplr(temp)];
+        end
+        vals=vals+temp;
+    end
+
+    vals=[vals fliplr(vals)];
+    H=sparse(1:dim,1:dim,vals,dim,dim);
+end
+
 % If J not supplied then a random matrix is generated, otherwise use it as a seed
 
 % Returns a sparse matrix
-function [H, J, num_solutions] = RandomIsing(N, J)
+function [H, J, num_solutions] = RandomIsing2(N, J)
 
     % Construct the Ising Hamiltonan on N qubits
     % H_f = -sum_{l<k} J_{lk} sigma^z_l tensor sigma^z_k - sum_l h_l sigma^z_l
