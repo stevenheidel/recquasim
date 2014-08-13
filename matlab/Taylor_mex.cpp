@@ -1,32 +1,39 @@
 #include "mex.h"
 #include <math.h>
+#include <stdio.h>
+#include <time.h>
 
 // Multiply a vector by H_i using magic multiply
 void multiply_by_h_i(int dim, double* input_r, double* input_i, double* output_r, double* output_i) {
     int m = 1;
-    int in = 0;
-    int out = 0;
+    int x = 0;
 
     while (dim > 1) {
         dim = dim >> 1;
-        m *= 2;
 
-        for (int i = 0; i < dim; i++) {
-            for (int j = 0; j < m; j++) {
-                out = j * dim + i;
-                in = (j % 2 == 0 ? out + dim : out - dim);
+        for (int j = 0; j < m; j++) {
+            for (int i = 0; i < dim; i++) {
+                x = j * dim * 2 + i;
 
                 // First iteration so set to 0
                 if (m == 2) {
-                    output_r[out] = 0;
-                    output_i[out] = 0;
+                    output_r[x] = 0;
+                    output_i[x] = 0;
+
+                    output_r[x + dim] = 0;
+                    output_i[x + dim] = 0;
                 }
 
                 // -= because all entries in H_i contain -1
-                output_r[out] -= input_r[in];
-                output_i[out] -= input_i[in];
+                output_r[x] -= input_r[x + dim];
+                output_i[x] -= input_i[x + dim];
+
+                output_r[x + dim] -= input_r[x];
+                output_i[x + dim] -= input_i[x];
             }
         }
+
+        m = m << 1;
     }
 
     return;
@@ -58,19 +65,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     double* psi_in_i = mxGetPi(prhs[2]);
 
     // Scalars
-    double t = mxGetScalar(prhs[1]);
-    double step = mxGetScalar(prhs[3]);
-    double tol = mxGetScalar(prhs[4]);
-    double installment = mxGetScalar(prhs[5]);
+    long double t = mxGetScalar(prhs[1]);
+    long double step = mxGetScalar(prhs[3]);
+    long double tol = mxGetScalar(prhs[4]);
+    long double installment = mxGetScalar(prhs[5]);
 
 /*
 i_by_psi_in = H_i * psi_in;
 f_by_psi_in = H_f_diag .* psi_in;
 */
     // Imaginary part of c
-    double c_i = -1 * t;
+    long double c_i = -1 * t;
     // Real part of d
-    double d = (installment - 1) * step;
+    long double d = (installment - 1) * step;
 
 /*
 i_by_psi_in = H_i * psi_in;
@@ -173,21 +180,26 @@ n = 1;
     double* temp;
 
     // Needed later for calculating norm
-    double cor_sum = 0;
-    double cor_r;
-    double cor_i;
+    long double cor_sum = 0;
+    long double cor_r;
+    long double cor_i;
 
-    double nrm_cor = 1;
-    double n = 1;
+    long double nrm_cor = 1;
+    long double n = 1;
 
     // ALGORITHM LOOP
+
+double time_h_i = 0;
+double time_h_f = 0;
+double time_for = 0;
+clock_t start;
+clock_t while_start = clock();
 
 /*
 while (nrm_cor > tol)
 n = n+1;
 */
-
-    double stepn = step;
+    long double stepn = step;
     while (nrm_cor > tol) {
         n++;
         stepn = stepn * step;
@@ -197,9 +209,15 @@ n = n+1;
     f_by_min_1 = H_f_diag .* psi_n_min_1
     */
 
+start = clock();
         multiply_by_h_i(dim, psi_n_min_1_r, psi_n_min_1_i, i_by_min_1_r, i_by_min_1_i);
-        multiply_by_h_f(dim, h_f, psi_n_min_1_r, psi_n_min_1_i, f_by_min_1_r, f_by_min_1_i);
+time_h_i += clock() - start;
 
+start = clock();
+        multiply_by_h_f(dim, h_f, psi_n_min_1_r, psi_n_min_1_i, f_by_min_1_r, f_by_min_1_i);
+time_h_f += clock() - start;
+
+start = clock();
         cor_sum = 0;
         for (int i = 0; i < dim; i++) {
 
@@ -221,6 +239,7 @@ n = n+1;
 
             cor_sum += cor_r * cor_r + cor_i * cor_i;
         }
+time_for += clock() - start;
 
     /*
     nrm_cor = norm(cor);
@@ -264,6 +283,13 @@ n = n+1;
         f_by_min_1_i = f_by_min_2_i; // will be overwritten
         f_by_min_2_i = temp; // source of recursion
     }
+
+/*
+double time_total = clock() - while_start;
+printf("time_h_i: %f\n", time_h_i / time_total * 100);
+printf("time_h_f: %f\n", time_h_f / time_total * 100);
+printf("time_for: %f\n", time_for / time_total * 100);
+*/
 
 /*
 psi_fin = psi;
