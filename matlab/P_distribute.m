@@ -22,27 +22,22 @@ step = 1/ninstal;
 psi_in = psi_0;
 
 % TEST C++ VERSION
-psi_in_mx = psi_0;
-tic;
-for k = 1:ninstal
-    psi_in_mx = Taylor_installment_distribute_accelerated(H_i, h_f, T, psi_in_mx, step, epsilon, k);
-end
-toc
-psi = psi_in_mx;
-P_mx = norm(psi(ind))^2;
-
-P = P_mx;
-% run recurrence
+% psi_in_mx = psi_0;
 % tic;
 % for k = 1:ninstal
-%     psi_in = Taylor_installment_distribute(H_i, h_f, T, psi_in, step, epsilon, k);
+%     psi_in_mx = Taylor_installment_distribute_accelerated(H_i, h_f, T, psi_in_mx, step, epsilon, k);
 % end
 % toc
+% psi = psi_in_mx;
+% P_mx = norm(psi(ind))^2;
 
-% psi = psi_in;
-% P = norm(psi(ind))^2
+% run recurrence
+for k = 1:ninstal
+    psi_in = Taylor_installment_distribute(H_i, h_f, T, psi_in, step, epsilon, k);
+end
 
-% P_mx - P
+psi = psi_in;
+P = norm(psi(ind))^2;
 
 end
 

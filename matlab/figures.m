@@ -1,10 +1,9 @@
 % Parameters
 
-% Figure 3
-runs = 20000;
-N = 8;
-T = 10;
-ninstal = 10;
+runs = 10000;
+N = 4;
+T = 3;
+ninstal = 3;
 
 processors = 4;
 epsilon = eps(1);

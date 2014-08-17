@@ -1,27 +1,58 @@
 % Optimized
 
-function H = RandomIsing(N)
-    dim=2^N;
-    vals=zeros(1,dim/2);
+% id is from 1 to total possibilities, and creates signos for that equivalent in binary
 
-    for k=1:N-1
-        temp=zeros(1,dim/2^k);
-        for r=k+1:N
-            mac=[ones(1,dim/2^r) -ones(1,dim/2^r)];
-            for p=1:r-(k+1)
-                mac=[mac mac];
+function H = RandomIsing(N, id)
+    signos = zeros(N, N);
+
+    if exist('id', 'var')
+        binary_digits = (N * (N-1) / 2);
+        total = 2 ^ binary_digits;
+
+        if id < 1 || id > total
+            error('id outside of range')
+        end
+
+        B = int8(bitget(id-1, 1:binary_digits));
+        B(B == 0) = -1;
+
+        count = 1;
+        for k = 1:N
+            for r = k+1:N
+                signos(k, r) = B(count);
+                count += 1;
             end
-            signo=2*randi(2,1)-3;
-            temp=temp+signo*mac;
         end
-        for p=1:k-1
-            temp=[temp fliplr(temp)];
-        end
-        vals=vals+temp;
+    else
+        signos = 2 * randi(2, N) - 3;
+        signos = triu(signos, 1);
     end
 
-    vals=[vals fliplr(vals)];
-    H=sparse(1:dim,1:dim,vals,dim,dim);
+    dim = 2^N;
+    vals = zeros(1, dim/2);
+
+    for k = 1:N-1
+        temp = zeros(1, dim/2^k);
+
+        for r = k+1:N
+            mac = [ones(1, dim/2^r) -ones(1, dim/2^r)];
+
+            for p = 1:r-(k+1)
+                mac = [mac mac];
+            end
+
+            temp = temp + signos(k, r) * mac;
+        end
+
+        for p = 1:k-1
+            temp = [temp fliplr(temp)];
+        end
+
+        vals = vals + temp;
+    end
+
+    vals = [vals fliplr(vals)];
+    H = sparse(1:dim, 1:dim, vals, dim, dim);
 end
 
 % If J not supplied then a random matrix is generated, otherwise use it as a seed
